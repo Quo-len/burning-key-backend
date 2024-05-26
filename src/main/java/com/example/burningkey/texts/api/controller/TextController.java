@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/texts")
-@CrossOrigin(origins = "*") // cross domain tomcat's port 8080 and react's 3000
+@CrossOrigin // cross domain tomcat's port 8080 and react's 3000
 public class TextController {
 
     @Autowired

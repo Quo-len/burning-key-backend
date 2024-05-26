@@ -30,7 +30,12 @@ public class TextService {
                 .language("English")
                 .difficulty("Medium")
                 .build());
-
+        textRepository.save(Text.builder()
+                .title("Insert title")
+                .content("Sukumar Azhikode defined a short story as 'a brief prose narrative with an intense episodic or anecdotal effect'. Flannery O'Connor emphasized the need to consider what is exactly meant by the descriptor short.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
     }
 
     public List<Text> getAllTexts() {

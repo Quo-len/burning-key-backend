@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/auth/**", "/api/v1/users/**", "/api/v1/texts/**")
-              //  .requestMatchers("/**")
+              //  .requestMatchers("/**") // access to all endpoints
                 .permitAll()
                 .anyRequest()
                 .authenticated()

@@ -16,6 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@CrossOrigin // cross domain tomcat's port 8080 and react's 3000
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;

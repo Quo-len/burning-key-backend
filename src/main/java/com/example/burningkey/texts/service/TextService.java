@@ -30,7 +30,7 @@ public class TextService {
         textRepository.save(Text.builder()
                 .title("Typing skill")
                 .content("The quick brown fox jumps over the lazy dog. This sentence is often used for typing practice because it contains every letter in the English alphabet at least once. It's a perfect example of a pangram, a sentence that uses all the letters of the alphabet. Typing accurately and efficiently is a valuable skill in today's digital world. With the increasing reliance on computers and digital communication, the ability to type quickly and without errors is more important than ever. Whether you are a student, a professional, or just someone who enjoys spending time online, improving your typing skills can have a significant impact on your productivity and overall experience. To improve your typing skills, start by focusing on proper hand placement and posture. Make sure your fingers rest on the home row keys and that you are sitting up straight. Practice regularly, and challenge yourself with new and varied texts to type. As you become more comfortable and confident, you will notice your speed and accuracy improving. Remember, consistency is key. The more you practice, the better you will become. Happy typing!")
-                .language("Latin")
+                .language("English")
                 .difficulty("Easy")
                 .build());
 
@@ -69,6 +69,12 @@ public class TextService {
                 .difficulty("Hard")
                 .build());
 
+        textRepository.save(Text.builder()
+                .title("Insert title")
+                .content("Sukumar Azhikode defined a short story as 'a brief prose narrative with an intense episodic or anecdotal effect'. Flannery O'Connor emphasized the need to consider what is exactly meant by the descriptor short.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
     }
 
     public long getTextCount() { return textRepository.count(); }

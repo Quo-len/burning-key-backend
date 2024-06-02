@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/texts")
-@CrossOrigin(origins = "*") // cross domain tomcat's port 8080 and react's 3000
+@CrossOrigin // cross domain tomcat's port 8080 and react's 3000
 public class TextController {
 
     @Autowired
@@ -22,8 +22,8 @@ public class TextController {
 
     // Get all texts
     @GetMapping
-    public ResponseEntity<List<TextDto>> getAllTexts() {
-        List<TextDto> textDtos = textService.getAllTexts().stream()
+    public ResponseEntity<List<TextDto>> getTexts(@RequestParam(required = false) String language, @RequestParam(required = false) String difficulty) {
+        List<TextDto> textDtos = textService.getTexts(language, difficulty).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(textDtos);
@@ -34,6 +34,40 @@ public class TextController {
     public ResponseEntity<TextDto> getTextById(@PathVariable Long id) {
         Optional<Text> optionalText = textService.getTextById(id);
         return optionalText.map(text -> ResponseEntity.ok(convertToDto(text)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // Get random text by given parameters
+    @GetMapping("/text")
+    public ResponseEntity<TextDto> getRandomText(@RequestParam(required = false) String language, @RequestParam(required = false) String difficulty) {
+        Optional<Text> optionalText = textService.getRandomText(language, difficulty);
+        return optionalText.map(text -> ResponseEntity.ok(convertToDto(text)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/word-sets")
+    public ResponseEntity<List<String>> getWordSets() {
+        return ResponseEntity.ok(TextService.getWordSets());
+    }
+
+    @GetMapping("/generate-words")
+    public ResponseEntity<TextDto> getRandomWords(
+            @RequestParam() String wordSetName,
+            @RequestParam(required = false) Integer numWords,
+            @RequestParam(required = false) Integer numSignsPercent,
+            @RequestParam(required = false) Integer numUpperCasePercent,
+            @RequestParam(required = false) Boolean doubleEveryWord) {
+        int numWordsToUse = (numWords != null) ? numWords : 10;
+        int numSignsPercentToUse = (numSignsPercent != null) ? numSignsPercent : 0;
+        int numUpperCasePercentToUse = (numUpperCasePercent != null) ? numUpperCasePercent : 0;
+        boolean  doubleEveryWordToUse = (doubleEveryWord != null) ? doubleEveryWord : false;
+        Optional<Text> optionalWords = textService.getRandomWords(
+                wordSetName,
+                numWordsToUse,
+                numSignsPercentToUse,
+                numUpperCasePercentToUse,
+                doubleEveryWordToUse);
+        return optionalWords.map(text -> ResponseEntity.ok(convertToDto(text)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

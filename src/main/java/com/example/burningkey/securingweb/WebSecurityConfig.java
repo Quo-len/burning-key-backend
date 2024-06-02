@@ -17,11 +17,14 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/h2-console/***")
                         .ignoringRequestMatchers("/api/v1/texts")
-                        .ignoringRequestMatchers("/api/v1/texts/***"))
+                        .ignoringRequestMatchers("/api/v1/texts/***")
+                        .ignoringRequestMatchers("/multiplayer/**")
+                )
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/api/v1/texts/***").permitAll()
                         .requestMatchers("/api/v1/texts").permitAll()
                         .requestMatchers("/h2-console/***").permitAll()
+                        .requestMatchers("/multiplayer/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions().sameOrigin())

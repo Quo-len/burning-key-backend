@@ -16,7 +16,7 @@ import java.io.Serializable;
 public class UserDTO {
 
     private String username;
-    private Short currentWordPosition;
+    private Integer currentWordPosition;
     private String currentWord;
     private String sessionId;
     @JsonIgnore

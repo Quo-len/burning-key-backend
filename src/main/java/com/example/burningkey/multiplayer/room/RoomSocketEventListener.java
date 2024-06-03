@@ -27,11 +27,15 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
         Map<String, Object> clientMessage = objectMapper.readValue(message.getPayload(), Map.class);
 
         String type = (String) clientMessage.get("type");
-        String username = (String) clientMessage.get("username");
         String uid = (String) clientMessage.get("uid");
+
 
         switch (type) {
             case "CONNECT":
+                Integer durationToStart = 5;
+
+                String username = (String) clientMessage.get("username");
+
                 session.getAttributes().put("uid", uid);
                 RoomDTO room = roomService.addMember(username, uid, session);
 
@@ -39,16 +43,34 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         .sessionId(session.getId())
                         .username(username)
                         .build();
-
+                if (room.getActiveUsers().size() >= 2) {
+                    sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                            "type", "TIMER",
+                            "duration", durationToStart
+                    ))), uid);
+                }
                 sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT_USER",
-                        "data", room.getActiveUsers()
+                        "data", room.getActiveUsers(),
+                        "sessionId", session.getId()
                 ))), session, uid);
 
-                sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                sendBroadcastMessageExcept(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT",
                         "data", user
                 ))), session, uid);
+                break;
+            case "DATA":
+                String currentWord = (String) clientMessage.get("currentWord");
+                Integer currentWordPosition = (Integer) clientMessage.get("wordCount");
+                String newSpeed = String.format("%.2f", Double.parseDouble((String) clientMessage.get("newSpeed")));
+                sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                        "type", "DATA",
+                        "currentWord", currentWord,
+                        "currentWordPosition", currentWordPosition,
+                        "sessionId", session.getId(),
+                        "newSpeed", newSpeed
+                ))), uid);
                 break;
         }
     }
@@ -63,17 +85,15 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
         sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                 "type", "DISCONNECT",
                 "data", userDTO
-        ))), session, uid);
-
+        ))), uid);
     }
 
 
-    private void sendBroadcastMessage(TextMessage textMessage, WebSocketSession session, String uid) throws IOException {
+    private void sendBroadcastMessageExcept(TextMessage textMessage, WebSocketSession session, String uid) throws IOException {
         RoomDTO room = roomService.getRooms().stream()
                 .filter(v -> v.getUid().equals(uid))
                 .findFirst()
                 .orElseThrow();
-
         room.getActiveUsers().stream()
                 .filter(v -> !v.getSession().equals(session))
                 .map(UserDTO::getSession)
@@ -84,7 +104,23 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         e.printStackTrace();
                     }
                 });
+    }
 
+    private void sendBroadcastMessage(TextMessage textMessage, String uid) throws IOException {
+        RoomDTO room = roomService.getRooms().stream()
+                .filter(v -> v.getUid().equals(uid))
+                .findFirst()
+                .orElseThrow();
+
+        room.getActiveUsers().stream()
+                .map(UserDTO::getSession)
+                .forEach(v -> {
+                    try {
+                        v.sendMessage(textMessage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     private void sendMessage(TextMessage textMessage, WebSocketSession session, String uid) throws IOException {

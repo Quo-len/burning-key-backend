@@ -12,7 +12,7 @@ import lombok.*;
 public class Text {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long textId;
+    private Long id;
     private String title;
     @Lob
     private String content;

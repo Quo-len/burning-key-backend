@@ -21,14 +21,14 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> userDtos = userService.getAllTexts().stream()
+        List<UserDto> userDtos = userService.getAllUsers().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(userDtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getTextById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         Optional<User> optionalUser = userService.getUserById(id);
         return optionalUser.map(user -> ResponseEntity.ok(convertToDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -42,16 +42,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(newUser));
     }
 
-    // Update an existing text
+    // Update an existing user
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto newUserDto) {
         User newUser = convertToEntity(newUserDto);
         Optional<User> updatedUser = userService.updateUser(id, newUser);
-        return updatedUser.map(text -> ResponseEntity.ok(convertToDto(text)))
+        return updatedUser.map(user -> ResponseEntity.ok(convertToDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Delete a text
+    // Delete a user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
@@ -61,7 +61,7 @@ public class UserController {
     // Convert Entity to DTO
     private UserDto convertToDto(User user) {
         UserDto userDto = new UserDto();
-        userDto.setUserId(user.getUserId());
+        userDto.setUserId(user.getId());
         userDto.setUsername(user.getUsername());
         userDto.setEmail(user.getEmail());
         return userDto;
@@ -70,7 +70,7 @@ public class UserController {
     // Convert DTO to Entity
     private User convertToEntity(UserDto userDto) {
         User user = new User();
-        user.setUserId(userDto.getUserId());
+        user.setId(userDto.getUserId());
         user.setUsername(userDto.getEmail());
         user.setEmail(userDto.getEmail());
         return user;

@@ -16,7 +16,7 @@ import java.time.LocalTime;
 public class UserLesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userSessionId;
+    private Long id;
 
     @OneToOne
     @MapsId

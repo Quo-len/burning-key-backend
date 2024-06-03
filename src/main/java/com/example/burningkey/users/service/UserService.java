@@ -16,7 +16,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @PostConstruct
-    public void addTexts() {
+    public void addUsers() {
 
         userRepository.save(User.builder()
                 .email("admin@example.com")
@@ -37,7 +37,7 @@ public class UserService {
                 .build());
     }
 
-    public List<User> getAllTexts() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -50,11 +50,11 @@ public class UserService {
     }
 
     public Optional<User> updateUser(Long id, User newUser) {
-        return userRepository.findById(id).map(existingText -> {
-            if (newUser.getUsername() != null) existingText.setUsername(newUser.getUsername());
-            if (newUser.getEmail() != null) existingText.setEmail(newUser.getEmail());
-            if (newUser.getRole() != null) existingText.setRole(newUser.getRole());
-            return userRepository.save(existingText);
+        return userRepository.findById(id).map(existingUser -> {
+            if (newUser.getUsername() != null) existingUser.setUsername(newUser.getUsername());
+            if (newUser.getEmail() != null) existingUser.setEmail(newUser.getEmail());
+            if (newUser.getRole() != null) existingUser.setRole(newUser.getRole());
+            return userRepository.save(existingUser);
         });
     }
 

@@ -1,27 +1,34 @@
 package com.example.burningkey.auth.service;
 
+import com.example.burningkey.auth.entity.AuthenticationRequest;
 import com.example.burningkey.auth.entity.AuthenticationResponse;
+import com.example.burningkey.auth.entity.RegisterRequest;
 import com.example.burningkey.securingweb.JwtService;
+import com.example.burningkey.token.entity.Token;
+import com.example.burningkey.token.entity.TokenType;
 import com.example.burningkey.token.repository.TokenRepository;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
+import com.example.burningkey.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository repository;
+    private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     private final JavaMailSender mailSender;
-    private final TokenRepository tokenRepository;
 
     public void sendAuthenticationEmail(String email, String token) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -33,32 +40,59 @@ public class AuthenticationService {
         System.out.println("HI");
     }
 
-    public User register(String email) {
+    public AuthenticationResponse register(RegisterRequest request) {
         var user = User.builder()
-                .username(email)
-                .email(email)
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
-        repository.save(user);
-        return user;
-    }
-
-    public String generateToken(User user) {
-        return jwtService.generateToken(user);
-    }
-
-    public AuthenticationResponse authenticate(String email, String token) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        email,
-                        token
-                )
-        );
-        var user = repository.findByEmail(email)
-                .orElseThrow();
-     //   var jwtToken = jwtService.generateToken(user);
+        var savedUser = userService.createUser(user);
+        var jwtToken = jwtService.generateToken(user);
+        saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
-                .token(token)
+                .token(jwtToken)
                 .build();
     }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        var user = repository.findByEmail(request.getEmail())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    private void saveUserToken(User user, String jwtToken) {
+        var token = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        tokenRepository.save(token);
+    }
+
+    private void revokeAllUserTokens(User user) {
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+
 }

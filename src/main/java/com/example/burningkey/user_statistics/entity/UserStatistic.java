@@ -14,7 +14,7 @@ public class UserStatistic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userStatisticId;
+    private Long id;
 
     @OneToOne // wtf is this relation
     @MapsId

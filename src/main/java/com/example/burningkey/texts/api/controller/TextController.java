@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -98,7 +100,7 @@ public class TextController {
     // Convert Entity to DTO
     private TextDto convertToDto(Text text) {
         TextDto textDto = new TextDto();
-        textDto.setTextId(text.getTextId());
+        textDto.setTextId(text.getId());
         textDto.setTitle(text.getTitle());
         textDto.setContent(text.getContent());
         textDto.setLanguage(text.getLanguage());
@@ -109,7 +111,7 @@ public class TextController {
     // Convert DTO to Entity
     private Text convertToEntity(TextDto textDto) {
         Text text = new Text();
-        text.setTextId(textDto.getTextId());
+        text.setId(textDto.getTextId());
         text.setTitle(textDto.getTitle());
         text.setContent(textDto.getContent());
         text.setLanguage(textDto.getLanguage());

@@ -167,7 +167,6 @@ public class TextService {
         String absolutePath = file.getAbsolutePath();
 
         List<String> randomWords = new ArrayList<>(numWords);
-
         int numOfLines = getNumberOfLines(absolutePath);
         Random rand = new Random();
 
@@ -195,32 +194,10 @@ public class TextService {
             throw new RuntimeException(e);
         }
 
-        int numSigns = (int) (numWords * (numSignsPercent / 100.0));
         int numUpperCaseWords = (int) (numWords * (numUpperCasePercent / 100.0));
-
-        String[] signs = {"?", "!", ".", ",", ":", ";", "\"", "\'"};
+        int numSigns = (int) (numWords * (numSignsPercent / 100.0));
 
         Set<Integer> modifiedIndices = new HashSet<>();
-        for (int i = 0; i < numSigns; i++) {
-            int randomIndex;
-            do {
-                randomIndex = rand.nextInt(numWords);
-            } while (modifiedIndices.contains(randomIndex));
-            modifiedIndices.add(randomIndex);
-
-            String word = randomWords.get(randomIndex);
-
-            int randomSignIdx = rand.nextInt(signs.length);
-            if (signs[randomSignIdx].equals("\"") || signs[randomSignIdx].equals("'")) {
-                String randomBothSidesSign = signs[randomSignIdx];
-                randomWords.set(randomIndex, randomBothSidesSign + word + randomBothSidesSign);
-            } else {
-                String randomEndSign = signs[randomSignIdx];
-                randomWords.set(randomIndex, word + randomEndSign);
-            }
-        }
-
-        modifiedIndices = new HashSet<>();
         for (int i = 0; i < numUpperCaseWords; i++) {
             int randomIndex;
             do {
@@ -230,6 +207,28 @@ public class TextService {
 
             String word = randomWords.get(randomIndex);
             randomWords.set(randomIndex, word.substring(0, 1).toUpperCase() + word.substring(1));
+        }
+
+        modifiedIndices = new HashSet<>();
+        for (int i = 0; i < numSigns; i++) {
+            int randomIndex;
+            do {
+                randomIndex = rand.nextInt(numWords);
+            } while (modifiedIndices.contains(randomIndex));
+            modifiedIndices.add(randomIndex);
+
+            String word = randomWords.get(randomIndex);
+
+            List<String> signs = Arrays.asList("?", "!", ".", ",", ":", ";", "\"", "'");
+
+            int randomSignIdx = rand.nextInt(signs.size());
+            if (signs.get(randomSignIdx).equals("\"") || signs.get(randomSignIdx).equals("'")) {
+                String randomBothSidesSign = signs.get(randomSignIdx);
+                randomWords.set(randomIndex, randomBothSidesSign + word + randomBothSidesSign);
+            } else {
+                String randomEndSign = signs.get(randomSignIdx);
+                randomWords.set(randomIndex, word + randomEndSign);
+            }
         }
 
         StringBuilder text = new StringBuilder();

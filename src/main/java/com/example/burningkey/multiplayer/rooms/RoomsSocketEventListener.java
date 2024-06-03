@@ -11,6 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoomsSocketEventListener extends TextWebSocketHandler {
 
@@ -48,12 +49,14 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
         session.getAttributes().put("username", username);
         Random random = new Random();
         int randomNumber = random.nextInt(0, 1000);
+        AtomicInteger startTimer = new AtomicInteger(5);
         switch (type) {
             case "CREATE":
-                RoomDTO room = roomService.createRoom(username + " " + randomNumber);
+                RoomDTO room = roomService.createRoom(username + " " + randomNumber, startTimer);
                 RoomDTO newRoom = RoomDTO.builder()
                         .uid(room.getUid())
                         .title(username + " " + randomNumber)
+                        .start(startTimer)
                         .build();
                 sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "DATA",

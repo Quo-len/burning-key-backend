@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @AllArgsConstructor
 @Data
@@ -21,5 +22,6 @@ public class RoomDTO {
     private List<UserDTO> activeUsers;
     private String uid;
     private String title;
+    private AtomicInteger start;
 
 }

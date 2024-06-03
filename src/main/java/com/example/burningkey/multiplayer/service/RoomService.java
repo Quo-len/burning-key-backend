@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class RoomService {
@@ -19,10 +20,11 @@ public class RoomService {
         roomService = this;
     }
 
-    public RoomDTO createRoom(String title) {
+    public RoomDTO createRoom(String title, AtomicInteger timer) {
         RoomDTO newRoom = RoomDTO.builder()
                 .uid(getUUID())
                 .activeUsers(Collections.synchronizedList(new ArrayList<>()))
+                .start(timer)
                 .title(title)
                 .build();
 

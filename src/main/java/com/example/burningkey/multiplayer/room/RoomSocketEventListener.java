@@ -11,12 +11,15 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoomSocketEventListener extends TextWebSocketHandler {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private RoomService roomService = RoomService.roomService;
-
+    private Semaphore semaphore = new Semaphore(1);
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         System.out.println("Open session");
@@ -32,23 +35,16 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
 
         switch (type) {
             case "CONNECT":
-                Integer durationToStart = 5;
 
                 String username = (String) clientMessage.get("username");
 
                 session.getAttributes().put("uid", uid);
                 RoomDTO room = roomService.addMember(username, uid, session);
-
                 UserDTO user = UserDTO.builder()
                         .sessionId(session.getId())
                         .username(username)
                         .build();
-                if (room.getActiveUsers().size() >= 2) {
-                    sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
-                            "type", "TIMER",
-                            "duration", durationToStart
-                    ))), uid);
-                }
+
                 sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT_USER",
                         "data", room.getActiveUsers(),
@@ -59,6 +55,21 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         "type", "CONNECT",
                         "data", user
                 ))), session, uid);
+
+                if (room.getActiveUsers().size() >= 2) {
+                    while (room.getStart().get() > 0) {
+                        semaphore.acquire();
+                        sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                                "type", "TIMER",
+                                "duration", room.getStart().getAndDecrement()
+                        ))), uid);
+                        TimeUnit.SECONDS.sleep(1);
+                        semaphore.release();
+                    }
+
+                }
+
+
                 break;
             case "DATA":
                 String currentWord = (String) clientMessage.get("currentWord");

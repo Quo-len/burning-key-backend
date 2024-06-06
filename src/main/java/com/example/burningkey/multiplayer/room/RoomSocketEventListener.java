@@ -10,7 +10,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,6 +22,7 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
     private ObjectMapper objectMapper = new ObjectMapper();
     private RoomService roomService = RoomService.roomService;
     private Semaphore semaphore = new Semaphore(1);
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         System.out.println("Open session");
@@ -32,12 +35,15 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
         String type = (String) clientMessage.get("type");
         String uid = (String) clientMessage.get("uid");
 
+        if (!roomService.isRoomExist(uid)) {
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                    "type", "EXPIRED_ROOM"
+            ))));
+        }
 
         switch (type) {
             case "CONNECT":
-
                 String username = (String) clientMessage.get("username");
-
                 session.getAttributes().put("uid", uid);
                 RoomDTO room = roomService.addMember(username, uid, session);
                 UserDTO user = UserDTO.builder()
@@ -45,6 +51,12 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         .username(username)
                         .build();
 
+                if (room.getStart().get() <= 0) {
+                    sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                            "type", "STARTED"
+                    ))), session, uid);
+                    return;
+                }
                 sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT_USER",
                         "data", room.getActiveUsers(),
@@ -57,7 +69,7 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 ))), session, uid);
 
                 if (room.getActiveUsers().size() >= 2) {
-                    while (room.getStart().get() > 0) {
+                    while (room.getStart().get() >= 0) {
                         semaphore.acquire();
                         sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                                 "type", "TIMER",
@@ -66,10 +78,8 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         TimeUnit.SECONDS.sleep(1);
                         semaphore.release();
                     }
-
+                    room.setStartedAt(System.currentTimeMillis());
                 }
-
-
                 break;
             case "DATA":
                 String currentWord = (String) clientMessage.get("currentWord");
@@ -81,6 +91,18 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         "currentWordPosition", currentWordPosition,
                         "sessionId", session.getId(),
                         "newSpeed", newSpeed
+                ))), uid);
+
+                break;
+            case "END_RACE":
+                var currentRoom = roomService.getRoomById(uid);
+                Map<String, Long> playersPosition = currentRoom.getPlayersPosition();
+                long duration = System.currentTimeMillis() - currentRoom.getStartedAt();
+                playersPosition.put(session.getId(), duration);
+
+                sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                        "type", "END_RACE",
+                        "userId", session.getId()
                 ))), uid);
                 break;
         }
@@ -101,20 +123,26 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
 
 
     private void sendBroadcastMessageExcept(TextMessage textMessage, WebSocketSession session, String uid) throws IOException {
-        RoomDTO room = roomService.getRooms().stream()
-                .filter(v -> v.getUid().equals(uid))
-                .findFirst()
-                .orElseThrow();
-        room.getActiveUsers().stream()
-                .filter(v -> !v.getSession().equals(session))
-                .map(UserDTO::getSession)
-                .forEach(v -> {
-                    try {
-                        v.sendMessage(textMessage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+
+        try {
+            RoomDTO room = roomService.getRooms().stream()
+                    .filter(v -> v.getUid().equals(uid))
+                    .findFirst()
+                    .orElseThrow();
+            room.getActiveUsers().stream()
+                    .filter(v -> !v.getSession().equals(session))
+                    .map(UserDTO::getSession)
+                    .forEach(v -> {
+                        try {
+                            v.sendMessage(textMessage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void sendBroadcastMessage(TextMessage textMessage, String uid) throws IOException {

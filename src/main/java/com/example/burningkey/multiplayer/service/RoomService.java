@@ -1,12 +1,10 @@
 package com.example.burningkey.multiplayer.service;
 
+import com.example.burningkey.multiplayer.rooms.RoomsSocketEventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -25,6 +23,7 @@ public class RoomService {
                 .uid(getUUID())
                 .activeUsers(Collections.synchronizedList(new ArrayList<>()))
                 .start(timer)
+                .playersPosition(new HashMap<>())
                 .title(title)
                 .build();
 
@@ -39,18 +38,35 @@ public class RoomService {
         }
     }
 
-    public RoomDTO addMember(String username, String uid, WebSocketSession session) throws Exception {
+    public boolean isRoomExist(String uid) {
+        return rooms.stream()
+                .anyMatch(v -> v.getUid().equals(uid));
+    }
+    public RoomDTO getRoomById(String uid) {
+        return rooms.stream()
+                .filter(v -> v.getUid().equals(uid))
+                .findFirst()
+                .orElseThrow();
+    }
+    public RoomDTO addMember(String username, String uid, WebSocketSession session) {
         UserDTO newUser = UserDTO.builder()
                 .username(username)
                 .session(session)
                 .sessionId(session.getId())
+                .completeText(0.0)
+                .currentWordPosition(0)
                 .build();
 
-        RoomDTO room = rooms.stream()
-                .filter(v -> v.getUid().equals(uid))
-                .findFirst()
-                .orElseThrow(() -> new Exception(String.format("Room with id %s not found", uid)));
-        room.getActiveUsers().add(newUser);
+        RoomDTO room = null;
+        try {
+            room = rooms.stream()
+                    .filter(v -> v.getUid().equals(uid))
+                    .findFirst()
+                    .orElseThrow(() -> new Exception(String.format("Room with id %s not found", uid)));
+            room.getActiveUsers().add(newUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return room;
     }
@@ -66,6 +82,11 @@ public class RoomService {
                 .orElseThrow();
         currentRoom.getActiveUsers().remove(userDTO);
 
+        if (currentRoom.getActiveUsers().size() <= 0) {
+            rooms.remove(currentRoom);
+            RoomsSocketEventListener.roomsSocketEventListener.broadCastRemoveRoom(currentRoom);
+        }
+
         return userDTO;
     }
 
@@ -73,7 +94,7 @@ public class RoomService {
         return rooms;
     }
 
-    public String getUUID() {
+    private String getUUID() {
         return UUID.randomUUID().toString();
     }
 

@@ -8,9 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @AllArgsConstructor
@@ -23,5 +25,7 @@ public class RoomDTO {
     private String uid;
     private String title;
     private AtomicInteger start;
+    private Map<String, Long> playersPosition;
+    private long startedAt;
 
 }

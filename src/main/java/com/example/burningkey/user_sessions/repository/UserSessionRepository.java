@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserSessionRepository extends JpaRepository<UserSession, Long>  {
 
-    List<UserSession> findUserSessionByUser(User user);
-    List<UserSession> findUserSessionByDate(LocalDate date);
-    List<UserSession> findUserSessionByUserAndDate(User user, LocalDate date);
+    List<UserSession> findAllByUser_Id(Long userId);
+    List<UserSession> findAllByDate(LocalDate date); // get all sessions of all users for leader board of particular day
+    Optional<UserSession> findByUser_IdAndDate(Long userId, LocalDate date);
+
 }

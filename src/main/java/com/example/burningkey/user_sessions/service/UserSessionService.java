@@ -1,8 +1,8 @@
 package com.example.burningkey.user_sessions.service;
 
+import com.example.burningkey.user_lessons.repository.UserLessonRepository;
 import com.example.burningkey.user_sessions.entity.UserSession;
 import com.example.burningkey.user_sessions.repository.UserSessionRepository;
-import com.example.burningkey.users.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,28 +16,39 @@ public class UserSessionService {
     @Autowired
     private UserSessionRepository userSessionRepository;
 
+    @Autowired
+    private UserLessonRepository userLessonRepository;
+
     public long getUserSessionCount() { return userSessionRepository.count(); }
 
-    public List<UserSession> getUserSessions(User user, LocalDate date) {
-        if (user != null && date != null) {
-            return userSessionRepository.findUserSessionByUserAndDate(user, date);
-        } else if (user != null) {
-            return userSessionRepository.findUserSessionByUser(user);
+    public List<UserSession> getUserSessions(Long userId, LocalDate date) {
+        if (userId != null) {
+            return userSessionRepository.findAllByUser_Id(userId);
         } else if (date != null) {
-            return userSessionRepository.findUserSessionByDate(date);
+            return userSessionRepository.findAllByDate(date);
         } else {
             return userSessionRepository.findAll();
         }
+    }
+
+    public Optional<UserSession> findUserSessionByUserIdAndDate(Long userId, LocalDate date) {
+        return userSessionRepository.findByUser_IdAndDate(userId, date);
     }
 
     public UserSession createUserSession(UserSession userSession) {
         return userSessionRepository.save(userSession);
     }
 
+   /* public UserSession getStatsForDayBrute(User user, LocalDate date) {
+        List<UserLesson> lessons = userLessonRepository.findAllByUserAndDate(user, date);
+
+        return
+    }*/
+
     public Optional<UserSession> updateUserSession(Long id, UserSession newUserSession) {
         return userSessionRepository.findById(id).map(existingText -> {
             if (newUserSession.getDate() != null) existingText.setDate(newUserSession.getDate());
-            if (newUserSession.getNumSessions() != null) existingText.setNumSessions(newUserSession.getNumSessions());
+            if (newUserSession.getNumLessons() != null) existingText.setNumLessons(newUserSession.getNumLessons());
             if (newUserSession.getTimeSpent() != null) existingText.setTimeSpent(newUserSession.getTimeSpent());
             if (newUserSession.getAverageSpeedWpm() != null) existingText.setAverageSpeedWpm(newUserSession.getAverageSpeedWpm());
             if (newUserSession.getAverageAccuracy() != null) existingText.setAverageAccuracy(newUserSession.getAverageAccuracy());

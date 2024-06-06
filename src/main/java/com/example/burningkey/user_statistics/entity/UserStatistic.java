@@ -13,16 +13,16 @@ import com.example.burningkey.users.entity.User;
 public class UserStatistic {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   // @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne // wtf is this relation
+    @OneToOne
     @MapsId
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private User user;
 
     private Integer totalSessions;
-    private LocalTime totalTimeSpent;
+    private Long totalTimeSpent;
 
     private Double bestSpeedWpm;
     private Double bestAccuracy;

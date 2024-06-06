@@ -59,19 +59,19 @@ public class UserController {
     }
 
     // Convert Entity to DTO
-    private UserDto convertToDto(User user) {
+    public UserDto convertToDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setUserId(user.getId());
-        userDto.setUsername(user.getUsername());
+        userDto.setNickname(user.getNickname());
         userDto.setEmail(user.getEmail());
         return userDto;
     }
 
     // Convert DTO to Entity
-    private User convertToEntity(UserDto userDto) {
+    public User convertToEntity(UserDto userDto) {
         User user = new User();
         user.setId(userDto.getUserId());
-        user.setUsername(userDto.getEmail());
+        user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
         return user;
     }

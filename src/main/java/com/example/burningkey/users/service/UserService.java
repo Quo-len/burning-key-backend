@@ -20,19 +20,19 @@ public class UserService {
 
         userRepository.save(User.builder()
                 .email("admin@example.com")
-                .username("admin")
+                .nickname("admin")
                 .role(Role.ADMIN)
                 .build());
 
         userRepository.save(User.builder()
                 .email("user@example.com")
-                .username("User1")
+                .nickname("User1")
                 .role(Role.USER)
                 .build());
 
         userRepository.save(User.builder()
                 .email("user2@example.com")
-                .username("User2")
+                .nickname("User2")
                 .role(Role.USER)
                 .build());
     }
@@ -51,7 +51,7 @@ public class UserService {
 
     public Optional<User> updateUser(Long id, User newUser) {
         return userRepository.findById(id).map(existingUser -> {
-            if (newUser.getUsername() != null) existingUser.setUsername(newUser.getUsername());
+            if (newUser.getNickname() != null) existingUser.setNickname(newUser.getUsername());
             if (newUser.getEmail() != null) existingUser.setEmail(newUser.getEmail());
             if (newUser.getRole() != null) existingUser.setRole(newUser.getRole());
             return userRepository.save(existingUser);

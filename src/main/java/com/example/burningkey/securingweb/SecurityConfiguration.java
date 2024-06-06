@@ -22,8 +22,26 @@ public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
+    // new try
+  /*  @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeRequests(authorize -> authorize
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }*/
+
+
+
     // disable security
-   /* @Bean
+  /*  @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
@@ -47,7 +65,7 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**")
+                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**", "/api/v1/users/**")
                 //  .requestMatchers("/**") // access to all endpoints
                 .permitAll()
                 .anyRequest()
@@ -66,7 +84,6 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
     // oauth2
   /*  @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

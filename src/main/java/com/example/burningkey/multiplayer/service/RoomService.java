@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -23,6 +24,7 @@ public class RoomService {
                 .uid(getUUID())
                 .activeUsers(Collections.synchronizedList(new ArrayList<>()))
                 .start(timer)
+                .executorService(Executors.newSingleThreadExecutor())
                 .playersPosition(new HashMap<>())
                 .title(title)
                 .build();

@@ -12,6 +12,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoomsSocketEventListener extends TextWebSocketHandler {
@@ -19,12 +22,10 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
     private ObjectMapper objectMapper = new ObjectMapper();
     private List<WebSocketSession> openSessions = Collections.synchronizedList(new ArrayList<>());
     private RoomService roomService = RoomService.roomService;
-
     public static RoomsSocketEventListener roomsSocketEventListener;
 
     public RoomsSocketEventListener() {
         roomsSocketEventListener = this;
-        System.out.println("create");
     }
 
 

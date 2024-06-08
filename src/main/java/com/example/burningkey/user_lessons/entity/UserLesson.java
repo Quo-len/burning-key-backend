@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity(name = "user_lessons")
 @Builder
@@ -18,14 +17,13 @@ public class UserLesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "userId")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     private LocalDate date;
 
-    private LocalTime timeSpent;
+    private Long timeSpent;
 
     private Double averageSpeedWpm;
     private Double averageAccuracy;

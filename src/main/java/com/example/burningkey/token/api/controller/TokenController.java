@@ -12,5 +12,4 @@ public class TokenController {
     @Autowired
     private TokenRepository tokenRepository;
 
-
 }

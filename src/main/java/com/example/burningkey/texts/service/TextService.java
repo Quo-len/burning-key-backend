@@ -194,6 +194,8 @@ public class TextService {
             throw new RuntimeException(e);
         }
 
+        Collections.shuffle(randomWords);
+
         int numUpperCaseWords = (int) (numWords * (numUpperCasePercent / 100.0));
         int numSigns = (int) (numWords * (numSignsPercent / 100.0));
 

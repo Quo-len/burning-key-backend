@@ -1,6 +1,9 @@
 package com.example.burningkey.users.entity;
 
 import com.example.burningkey.token.entity.Token;
+import com.example.burningkey.user_lessons.entity.UserLesson;
+import com.example.burningkey.user_sessions.entity.UserSession;
+import com.example.burningkey.user_statistics.entity.UserStatistic;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,17 +23,23 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue
     private Long id;
-    private String username;
-    private String firstname;
-    private String lastname;
+    private String nickname;
     private String email;
-    private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToOne(mappedBy = "user")
+    private UserStatistic userstatistics;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserSession> usersessions;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserLesson> userlessons;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -39,7 +48,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return null;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.example.burningkey.auth.service;
 
-import com.example.burningkey.auth.entity.AuthenticationRequest;
 import com.example.burningkey.auth.entity.AuthenticationResponse;
 import com.example.burningkey.auth.entity.RegisterRequest;
 import com.example.burningkey.securingweb.JwtService;
@@ -11,73 +10,88 @@ import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
 import com.example.burningkey.users.service.UserService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-public class AuthenticationService {
-    private final UserRepository repository;
-    private final TokenRepository tokenRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
-    private final UserService userService;
+import java.util.Optional;
 
-    private final JavaMailSender mailSender;
+@Service
+public class AuthenticationService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TokenRepository tokenRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     public void sendAuthenticationEmail(String email, String token) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
         mailMessage.setSubject("Your signin link");
-        mailMessage.setText(String.format("%s\nHello!\nAccess your account here: http://localhost:8080/api/v1/auth/authenticate/%s?uid=%s",token,token,email));
-
+        mailMessage.setText(String.format("Hello!\nAccess your account here: http://localhost:8080/api/v1/auth/authenticate/%s\nExpires in 10 minutes", token));
         mailSender.send(mailMessage);
-        System.out.println("HI");
     }
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public User register(RegisterRequest request) {
         var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
-        var savedUser = userService.createUser(user);
-        var jwtToken = jwtService.generateToken(user);
-        saveUserToken(savedUser, jwtToken);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        return userRepository.save(user);
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        var user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
+    public AuthenticationResponse authenticateWithToken(String token) {
+        String email = jwtService.extractUsername(token);
+        var user = userRepository.findByEmail(email).orElseThrow();
+        if (validateWelcomeToken(token)) {
+            var jwtToken = jwtService.generateToken(user, 720,0,0); // 30 days
+            revokeAllUserTokens(user);
+            saveUserToken(user, jwtToken, TokenType.BEARER);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .user(userService.convertToDto(user))
+                    .build();
+        } else {
+            throw new RuntimeException("Invalid token");
+        }
+    }
+
+    public String generateToken(User user, TokenType tokenType, int hours, int minutes, int seconds) {
+        var jwtToken = jwtService.generateToken(user, hours, minutes, seconds);
         revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        saveUserToken(user, jwtToken, tokenType);
+        return jwtToken;
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    public boolean validateWelcomeToken(String token) {
+        Optional<Token> tokenOpt = tokenRepository.findByToken(token);
+        String email = jwtService.extractUsername(token);
+        if (tokenOpt.isPresent()) {
+            Token foundToken = tokenOpt.get();
+            boolean isValid = foundToken.getTokenType() == TokenType.WELCOME && !foundToken.isExpired() && !foundToken.isRevoked() && foundToken.getUser().getEmail().equals(email);
+            foundToken.setExpired(true);
+            foundToken.setExpired(true);
+            return isValid;
+        }
+        return false;
+    }
+
+    private void saveUserToken(User user, String jwtToken, TokenType tokenType) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
-                .tokenType(TokenType.BEARER)
+                .tokenType(tokenType)
                 .expired(false)
                 .revoked(false)
                 .build();
@@ -86,13 +100,12 @@ public class AuthenticationService {
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
-        if (validUserTokens.isEmpty())
-            return;
-        validUserTokens.forEach(token -> {
-            token.setExpired(true);
-            token.setRevoked(true);
-        });
-        tokenRepository.saveAll(validUserTokens);
+        if (!validUserTokens.isEmpty()) {
+            validUserTokens.forEach(token -> {
+                token.setExpired(true);
+                token.setRevoked(true);
+            });
+            tokenRepository.saveAll(validUserTokens);
+        }
     }
-
 }

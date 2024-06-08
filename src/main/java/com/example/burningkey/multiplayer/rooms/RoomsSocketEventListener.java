@@ -2,6 +2,7 @@ package com.example.burningkey.multiplayer.rooms;
 
 import com.example.burningkey.multiplayer.service.RoomDTO;
 import com.example.burningkey.multiplayer.service.RoomService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -11,6 +12,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoomsSocketEventListener extends TextWebSocketHandler {
@@ -18,6 +22,12 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
     private ObjectMapper objectMapper = new ObjectMapper();
     private List<WebSocketSession> openSessions = Collections.synchronizedList(new ArrayList<>());
     private RoomService roomService = RoomService.roomService;
+    public static RoomsSocketEventListener roomsSocketEventListener;
+
+    public RoomsSocketEventListener() {
+        roomsSocketEventListener = this;
+    }
+
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -45,17 +55,16 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
 
         String type = (String) clientMessage.get("type");
         String username = (String) clientMessage.get("username");
-
+        String title = (String) clientMessage.get("title");
         session.getAttributes().put("username", username);
         Random random = new Random();
-        int randomNumber = random.nextInt(0, 1000);
         AtomicInteger startTimer = new AtomicInteger(5);
         switch (type) {
             case "CREATE":
-                RoomDTO room = roomService.createRoom(username + " " + randomNumber, startTimer);
+                RoomDTO room = roomService.createRoom(title, startTimer);
                 RoomDTO newRoom = RoomDTO.builder()
                         .uid(room.getUid())
-                        .title(username + " " + randomNumber)
+                        .title(title)
                         .start(startTimer)
                         .build();
                 sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
@@ -77,6 +86,14 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
         for (WebSocketSession session : openSessions) {
             session.sendMessage(textMessage);
         }
+    }
+
+    public void broadCastRemoveRoom(RoomDTO roomDTO) throws IOException {
+
+        sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                "type", "REMOVE_ROOM",
+                "data", roomDTO
+        ))));
     }
 
 }

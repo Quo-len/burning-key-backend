@@ -1,5 +1,6 @@
 package com.example.burningkey.users.api.controller;
 
+import com.example.burningkey.securingweb.JwtService;
 import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.service.UserService;
@@ -18,6 +19,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
@@ -41,6 +45,14 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/by-token/{token}")
+    public ResponseEntity<UserDto> getUserByToken(@PathVariable String token) {
+        String userEmail = jwtService.extractUsername(token);
+        Optional<User> optionalUser = userService.getUserByEmail(userEmail);
+        return optionalUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // Create a new text
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
@@ -50,12 +62,9 @@ public class UserController {
     }
 
     // Update an existing user
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto newUserDto) {
-        User newUser = userService.convertToEntity(newUserDto);
-        Optional<User> updatedUser = userService.updateUser(id, newUser);
-        return updatedUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/nickname")
+    public ResponseEntity<String> getNewNickname() {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.generateNickname());
     }
 
     // Delete a user

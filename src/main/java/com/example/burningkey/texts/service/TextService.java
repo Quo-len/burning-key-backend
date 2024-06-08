@@ -21,7 +21,7 @@ public class TextService {
     public void addTexts() {
 
         textRepository.save(Text.builder()
-                .title("Insert title")
+                .title("Legenda")
                 .content("Sukumar Azhikode defined a short story as 'a brief prose narrative with an intense episodic or anecdotal effect'. Flannery O'Connor emphasized the need to consider what is exactly meant by the descriptor short.")
                 .language("English")
                 .difficulty("Easy")
@@ -29,52 +29,215 @@ public class TextService {
 
         textRepository.save(Text.builder()
                 .title("Typing skill")
-                .content("The quick brown fox jumps over the lazy dog. This sentence is often used for typing practice because it contains every letter in the English alphabet at least once. It's a perfect example of a pangram, a sentence that uses all the letters of the alphabet. Typing accurately and efficiently is a valuable skill in today's digital world. With the increasing reliance on computers and digital communication, the ability to type quickly and without errors is more important than ever. Whether you are a student, a professional, or just someone who enjoys spending time online, improving your typing skills can have a significant impact on your productivity and overall experience. To improve your typing skills, start by focusing on proper hand placement and posture. Make sure your fingers rest on the home row keys and that you are sitting up straight. Practice regularly, and challenge yourself with new and varied texts to type. As you become more comfortable and confident, you will notice your speed and accuracy improving. Remember, consistency is key. The more you practice, the better you will become. Happy typing!")
+                .content("The quick brown fox jumps over the lazy dog. This sentence is often used for typing practice because it contains every letter in the English alphabet at least once.")
                 .language("English")
                 .difficulty("Easy")
                 .build());
 
         textRepository.save(Text.builder()
-                .title("Insert title")
-                .content("In the heart of the bustling city, there was a small, cozy bookstore that seemed to be a world of its own. The walls were lined with shelves that reached up to the ceiling, each one filled with books of every genre imaginable. The scent of old paper and fresh ink mingled in the air, creating an aroma that was both comforting and invigorating. People from all walks of life visited the bookstore. Some came to find specific titles, while others wandered aimlessly, letting their fingers glide over the spines of books until something caught their eye. The owner, an elderly gentleman with a kind smile and a wealth of knowledge, was always ready to recommend a good read or engage in a lively discussion about literature. In one corner of the bookstore, there was a small reading nook with a plush armchair and a lamp that cast a warm glow. It was the perfect spot for losing oneself in a good book. Many patrons spent hours there, completely absorbed in the worlds that unfolded within the pages they held. The bookstore also hosted weekly events, from poetry readings to book signings, which drew crowds of enthusiastic readers and aspiring writers. These gatherings fostered a sense of community and camaraderie among the attendees, who shared a common love for the written word. Despite the rise of digital books and online retailers, the bookstore thrived. Its charm lay not only in the vast selection of books but also in the atmosphere it provided—a haven for book lovers in a fast-paced world. The bookstore was more than just a place to buy books; it was a sanctuary where stories came to life and imaginations were set free. As the sun set and the city lights began to twinkle, the bookstore remained a beacon of warmth and knowledge. It was a reminder that, even in the digital age, the magic of holding a book and turning its pages could never be replaced. The little bookstore continued to be a cherished gem in the heart of the city, a place where every visit promised a new adventure.")
+                .title("Silent Reflections")
+                .content("In the quiet of dawn, I find peace in solitude. Each morning brings a chance to start anew, leaving behind the shadows of yesterday.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Whispered Dreams")
+                .content("As night falls, dreams whisper secrets of the heart. In the dark, I discover hopes and fears, waiting to be embraced.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Echoes of Memory")
+                .content("Memories linger like echoes in an empty room. They remind me of moments gone by, yet they never truly fade away.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Dancing Shadows")
+                .content("Under the moonlight, shadows dance in the night. They tell stories of forgotten times, weaving a tapestry of light and dark.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Morning Light")
+                .content("With the first light of day, hope awakens. The world feels fresh and full of possibilities, a blank canvas ready to be painted.")
+                .language("English")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Dreams and Reality")
+                .content("In the quiet hours of early morning, when dreams still linger in the corners of my mind, I find myself caught between worlds. Each dream feels like a distant memory, a fleeting glimpse of a reality that exists just beyond my reach.")
                 .language("English")
                 .difficulty("Medium")
                 .build());
 
         textRepository.save(Text.builder()
-                .title("Congratulo")
-                .content("Deus vult, ave Maria")
-                .language("Latin")
-                .difficulty("Easy")
-                .build());
-
-        textRepository.save(Text.builder()
-                .title("Title 1")
-                .content("1 Text Text Text Text Text Text ")
-                .language("English")
-                .difficulty("Easy")
-                .build());
-
-        textRepository.save(Text.builder()
-                .title("Title 2")
-                .content("2 Text Text Text Text Text Text ")
+                .title("Waves of Time")
+                .content("Time flows like a river, with each moment a wave that crashes upon the shores of my consciousness. The past and present merge, creating ripples that echo through my thoughts, reminding me of all that has been and all that is yet to come.")
                 .language("English")
                 .difficulty("Medium")
                 .build());
 
         textRepository.save(Text.builder()
-                .title("Title 3")
-                .content("Text")
+                .title("Inner Dialogues")
+                .content("Within the silence of my own mind, conversations unfold between different facets of my identity. These inner dialogues reveal hidden truths and unspoken fears, allowing me to explore the depths of who I am and who I wish to be.")
+                .language("English")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Shadows of Memory")
+                .content("Memories cast long shadows that stretch across the landscape of my mind. Each one holds a piece of my history, a fragment of a story that defines who I am. As I reflect on these moments, I find meaning in the patterns they create.")
+                .language("English")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Twilight Reflections")
+                .content("As the sun sets and the sky is painted with shades of orange and pink, I am reminded of the transient beauty of life. This twilight hour, where day meets night, offers a moment of reflection and a chance to appreciate the delicate balance of existence.")
+                .language("English")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Transcendent Ephemera")
+                .content("Within the interstices of diurnal cognition and nocturnal reverie, I encounter phantasms of ideation that illuminate the crepuscular recesses of the psyche. These ephemera, though transient, inscribe indelible marks upon the palimpsest of consciousness, evoking a sublime interplay between lucidity and obfuscation.")
                 .language("English")
                 .difficulty("Hard")
                 .build());
 
         textRepository.save(Text.builder()
-                .title("Insert title")
-                .content("Sukumar Azhikode defined a short story as 'a brief prose narrative with an intense episodic or anecdotal effect'. Flannery O'Connor emphasized the need to consider what is exactly meant by the descriptor short.")
+                .title("Chronotopic Disjunction")
+                .content("Navigating the chronotopic continuum, I confront the paradox of temporal simultaneity and fragmentation. Each temporal fragment, a tessera in the mosaic of existence, reflects the multifaceted nature of reality, wherein the confluence of past, present, and future generates a complex, interwoven tapestry of experiential phenomena.")
                 .language("English")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Ontic Duality")
+                .content("In the dialectical oscillation between being and becoming, I am ensnared by the paradoxical duality of ontic existence. This perpetual fluctuation between the immutable and the ephemeral constitutes the essence of my ontological inquiry, compelling a relentless interrogation of the self as both a static and dynamic entity.")
+                .language("English")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Phenomenological Dichotomy")
+                .content("The phenomenological dichotomy of presence and absence manifests as a dynamic tension within the perceptual field. Each encounter with the noumenal world is mediated by the interplay of the seen and the unseen, engendering a profound epistemological rift that challenges the coherence of objective reality.")
+                .language("English")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Noological Resonance")
+                .content("In the pursuit of noological transcendence, I grapple with the ineffable resonance of the metaphysical. This pursuit transcends mere epistemic inquiry, seeking instead a deeper, ontological synthesis that harmonizes the corporeal and the incorporeal, revealing the hidden symmetries that underlie the fabric of existence.")
+                .language("English")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Прекрасна пора")
+                .content("Літо настало, і природа оживає: пташки співають, квіти розцвітають, а сонце радує своїм теплом.")
+                .language("Ukrainian")
                 .difficulty("Easy")
                 .build());
+
+        textRepository.save(Text.builder()
+                .title("Прекрасна пора")
+                .content("Літо настало, і природа оживає: пташки співають, квіти розцвітають, а сонце радує своїм теплом.")
+                .language("Ukrainian")
+                .difficulty("Easy")
+                .build());
+
+
+        textRepository.save(Text.builder()
+                .title("Парк Паркович")
+                .content("Вчора я зустрів старого друга у парку, його звати Патрік Паркінсон. Ми пригадали спільні пригоди та поділилися новинами.")
+                .language("Ukrainian")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Успішність")
+                .content("Щоб досягти успіху, потрібно бути наполегливим і цілеспрямованим у своїх діях.")
+                .language("Ukrainian")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Не гроші")
+                .content("Здоров'я - це найбільше багатство. Тому важливо дбати про нього, регулярно вправляючись та правильно харчуючись.")
+                .language("Ukrainian")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Добро")
+                .content("Кожен день - це нова можливість створити щось чудове і зробити світ кращим.")
+                .language("Ukrainian")
+                .difficulty("Easy")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Ранок")
+                .content("Сьогоднішній день почався з важкої пробудження, та швидкого сніданку. Попри це, я вирішив зібратися зі своїми друзями на прогулянку в парку. Там, звичайно, був Патрік Паркінсон. Погода була прекрасною, і ми насолоджувалися спілкуванням та свіжим повітрям.")
+                .language("Ukrainian")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Мистецтво")
+                .content("У вівторок я відвідав музей сучасного мистецтва разом із групою студентів разом з моїм другом Патріком Паркінсоном з мого університету. Експозиція вражала різноманіттям та оригінальністю творів.")
+                .language("Ukrainian")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Книга")
+                .content("Завдяки новій книзі, яка потрапила до моєї бібліотеки, я провів весь вечір у захоплюючому світі пригод та фантастичних історій Патріка Паркінсона.")
+                .language("Ukrainian")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Кіно")
+                .content("Я вирішив розслабитися після довгого робочого дня, організувавши собі домашній кіносеанс. Обравши мій улюблений фільм \"Пригоди Парка Паркінсона\", я погрузився у світ кіно та емоцій.")
+                .language("Ukrainian")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Гори")
+                .content("На вихідних я вирушив у мандрівку до гір. Підкорюючи вершини та насолоджуючись красою природи, я відчував себе вільним і щасливим.")
+                .language("Ukrainian")
+                .difficulty("Medium")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Тиждень")
+                .content("Після завершення важкого робочого тижня я вирішив приділити собі трохи часу на саморозвиток. Запланувавши вечір, наповнений читанням фахової літератури та виконанням вправ з медитації, я відчув, що це допомагає мені зосередитися і знайти внутрішню гармонію.")
+                .language("Ukrainian")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Ціль")
+                .content("Останнім часом я задумувався над тим, які цілі я хочу досягти в своєму житті і який шлях обрати для їх досягнення. Свідомо відводячи час для самоаналізу та планування, я зрозумів, що ключ до успіху полягає в усвідомленні власних цінностей та поступовому крокуванні в напрямку своїх мрій.")
+                .language("Ukrainian")
+                .difficulty("Hard")
+                .build());
+
+        textRepository.save(Text.builder()
+                .title("Медитація")
+                .content("Медитуючи про майбутнє, я розумію, що важливо знайти баланс між професійним ростом та особистим щастям. Стежачи за своїми мріями, я відчуваю, що кожен крок, який я роблю, приводить мене ближче до своєї ідеальної версії себе.")
+                .language("Ukrainian")
+                .difficulty("Hard")
+                .build());
+
     }
 
     public long getTextCount() { return textRepository.count(); }

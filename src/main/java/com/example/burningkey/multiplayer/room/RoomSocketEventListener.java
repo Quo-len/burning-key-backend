@@ -1,5 +1,6 @@
 package com.example.burningkey.multiplayer.room;
 
+import com.example.burningkey.multiplayer.rooms.RoomsSocketEventListener;
 import com.example.burningkey.multiplayer.service.RoomDTO;
 import com.example.burningkey.multiplayer.service.RoomService;
 import com.example.burningkey.multiplayer.service.UserDTO;
@@ -12,6 +13,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
@@ -21,7 +23,8 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private RoomService roomService = RoomService.roomService;
-    private ConcurrentHashMap<String, ExecutorService> roomThread = new ConcurrentHashMap<>();
+    private HashMap<String, ExecutorService> timer = new HashMap<>();
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         System.out.println("Open session");
@@ -53,6 +56,7 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                     "type", "EXPIRED_ROOM"
             ))));
+            return;
         }
 
         switch (type) {
@@ -81,17 +85,28 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         "type", "CONNECT",
                         "data", user
                 ))), session, uid);
+                RoomsSocketEventListener.roomsSocketEventListener.broadCastUserConnect(uid, user.getUsername(), room.isTimerCountDown());
 
+                ExecutorService executorService = timer.computeIfAbsent(uid, k -> Executors.newSingleThreadExecutor());
+                timer.put(uid, executorService);
                 if (room.getActiveUsers().size() >= 2) {
-                    while (room.getStart().get() >= 0) {
-                        sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
-                                "type", "TIMER",
-                                "duration", room.getStart().getAndDecrement()
-                        ))), uid);
-                        TimeUnit.SECONDS.sleep(1);
-                    }
-                    room.setStartedAt(System.currentTimeMillis());
+                    room.setTimerCountDown(true);
+                    executorService.submit(() -> {
+                        while (room.getStart().get() >= 0) {
+                            try {
+                                sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                                        "type", "TIMER",
+                                        "duration", room.getStart().getAndDecrement()
+                                ))), uid);
+                                TimeUnit.SECONDS.sleep(1);
+                            } catch (IOException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        room.setStartedAt(System.currentTimeMillis());
+                    });
                 }
+                timer.remove(uid);
                 break;
             case "DATA":
                 String currentWord = (String) clientMessage.get("currentWord");
@@ -107,11 +122,6 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
 
                 break;
             case "END_RACE":
-                var currentRoom = roomService.getRoomById(uid);
-                Map<String, Long> playersPosition = currentRoom.getPlayersPosition();
-                long duration = System.currentTimeMillis() - currentRoom.getStartedAt();
-                playersPosition.put(session.getId(), duration);
-
                 sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "END_RACE",
                         "userId", session.getId()
@@ -162,6 +172,7 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 .findFirst()
                 .orElseThrow();
 
+        System.out.println("room: " + room.getActiveUsers().size());
         room.getActiveUsers().stream()
                 .map(UserDTO::getSession)
                 .forEach(v -> {

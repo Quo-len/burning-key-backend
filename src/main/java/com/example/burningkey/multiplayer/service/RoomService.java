@@ -26,6 +26,7 @@ public class RoomService {
                 .start(timer)
                 .executorService(Executors.newSingleThreadExecutor())
                 .playersPosition(new HashMap<>())
+                .isTimerCountDown(false)
                 .title(title)
                 .build();
 

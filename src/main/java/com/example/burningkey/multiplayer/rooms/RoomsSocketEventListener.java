@@ -38,6 +38,9 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
                 .map(room -> RoomDTO.builder()
                         .uid(room.getUid())
                         .title(room.getTitle())
+                        .start(room.getStart())
+                        .activeUsers(room.getActiveUsers())
+                        .isTimerCountDown(room.isTimerCountDown())
                         .build())
                 .toList();
 
@@ -89,10 +92,18 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
     }
 
     public void broadCastRemoveRoom(RoomDTO roomDTO) throws IOException {
-
         sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                 "type", "REMOVE_ROOM",
                 "data", roomDTO
+        ))));
+    }
+
+    public void broadCastUserConnect(String uid, String username, boolean isTimerCountDown) throws IOException {
+        sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                "type", "CONNECT_USER",
+                "uid", uid,
+                "username", username,
+                "isTimerCountDown", isTimerCountDown
         ))));
     }
 

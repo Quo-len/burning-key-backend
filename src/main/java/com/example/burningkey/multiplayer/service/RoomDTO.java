@@ -30,6 +30,7 @@ public class RoomDTO {
     private AtomicInteger start;
     private Map<String, Long> playersPosition;
     private long startedAt;
+    private boolean isTimerCountDown;
     @JsonIgnore
     private ExecutorService executorService;
 

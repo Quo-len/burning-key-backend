@@ -18,6 +18,7 @@ public class UserDTO {
     private String username;
     private Integer currentWordPosition;
     private String currentWord;
+    private Double completeText;
     private String sessionId;
     @JsonIgnore
     private WebSocketSession session;

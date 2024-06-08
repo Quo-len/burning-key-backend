@@ -69,6 +69,8 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**")
                 //  .requestMatchers("/**") // access to all endpoints
                 .permitAll()
+                .requestMatchers("/multiplayer/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

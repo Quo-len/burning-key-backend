@@ -12,14 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class UserLessonService {
 
-   /* @Autowired
+    @Autowired
     private UserLessonRepository userLessonRepository;
 
     @Autowired
@@ -33,7 +33,7 @@ public class UserLessonService {
 
     public long getUserLessonCount() { return userLessonRepository.count(); }
 
-    public List<UserLesson> getUserLessons(Long userId, LocalDateTime date) {
+    public List<UserLesson> getUserLessons(Long userId, LocalDate date) {
         if (userId != null && date != null) {
             return userLessonRepository.findAllByUser_IdAndDate(userId, date);
         } else if (userId != null) {
@@ -49,23 +49,28 @@ public class UserLessonService {
         return userLessonRepository.save(userSession);
     }
 
-    public void smartAddUserLesson(Long userId, UserLesson userLesson) {
-        Optional<UserSession> userSessionOpt = userSessionService.findUserSessionByUserIdAndDate(userId, userLesson.getDate().toLocalDate());
-        UserSession userSession = userSessionOpt.orElseGet(() -> {
-            Optional<User> userOptional = userService.getUserById(userId);
-            if (userOptional.isEmpty()) {
-                throw new RuntimeException("User not found with id: " + userId);
-            }
-            User user = userOptional.get();
-            UserSession newUserSession = new UserSession();
-            newUserSession.setUser(user);
-            newUserSession.setDate(userLesson.getDate().toLocalDate());
-            userSessionService.createUserSession(newUserSession);
-            return userSessionService.createUserSession(newUserSession);
-        });
+    public void AddNewUserLesson(Long userId, UserLesson userLesson) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+        User user = userOptional.get();
+        userLesson.setUser(user);
+
+        // update session of given day
+        AtomicBoolean isNewSession = new AtomicBoolean(false);
+        Optional<UserSession> userSessionOpt = Optional.ofNullable(userSessionService.getUserSessionByUserAndDate(user, userLesson.getDate()).orElseGet(() -> {
+            UserSession newUserSession = userSessionService.createUserSession(user, userLesson.getDate());
+            isNewSession.set(true);
+            return newUserSession;
+        }));
+        UserSession userSession = userSessionOpt.get();
 
         userSession.setBestSpeedWpm(Math.max(userSession.getBestSpeedWpm(), userLesson.getAverageSpeedWpm()));
         userSession.setBestAccuracy(Math.max(userSession.getBestAccuracy(), userLesson.getAverageAccuracy()));
+
+        double oldWpm = userSession.getAverageSpeedWpm();
+        double oldAcc = userSession.getAverageAccuracy();
 
         userSession.setAverageSpeedWpm((userSession.getAverageSpeedWpm() * userSession.getNumLessons() + userLesson.getAverageSpeedWpm()) / (userSession.getNumLessons() + 1));
         userSession.setAverageAccuracy((userSession.getAverageAccuracy() * userSession.getNumLessons() + userLesson.getAverageAccuracy()) / (userSession.getNumLessons() + 1));
@@ -73,26 +78,31 @@ public class UserLessonService {
         userSession.setNumLessons(userSession.getNumLessons() + 1);
         userSession.setTimeSpent(userSession.getTimeSpent() + userLesson.getTimeSpent());
 
-        Optional<UserStatistic> userStatisticOpt = userStatisticService.getUserStatisticByUserId(userId);
-        UserStatistic userStatistic = userStatisticOpt.orElseGet(() -> {
-            Optional<User> userOptional = userService.getUserById(userId);
-            if (userOptional.isEmpty()) {
-                throw new RuntimeException("User not found with id: " + userId);
-            }
-            User user = userOptional.get();
-            UserStatistic newUserStatistic = new UserStatistic();
-            newUserStatistic.setUser(user);
-            return userStatisticService.createUserStatistic(newUserStatistic);
-        });
+        userSessionService.updateUserSession(userSession.getId(), userSession);
+
+        // update overall user statistics
+        Optional<UserStatistic> userStatisticOpt = userStatisticService.getUserStatisticByUserId(user);
+        UserStatistic userStatistic = userStatisticOpt.get();
 
         userStatistic.setBestSpeedWpm(Math.max(userStatistic.getBestSpeedWpm(), userLesson.getAverageSpeedWpm()));
         userStatistic.setBestAccuracy(Math.max(userStatistic.getBestAccuracy(), userLesson.getAverageAccuracy()));
 
-        userStatistic.setAverageSpeedWpm((userStatistic.getAverageSpeedWpm() * userStatistic.getTotalSessions() + userLesson.getAverageSpeedWpm()) / (userStatistic.getTotalSessions() + 1));
-        userStatistic.setAverageAccuracy((userStatistic.getAverageAccuracy() * userStatistic.getTotalSessions() + userLesson.getAverageAccuracy()) / (userStatistic.getTotalSessions() + 1));
+        if(isNewSession.get()) {
+            userStatistic.setAverageSpeedWpm((userStatistic.getAverageSpeedWpm() * userStatistic.getTotalSessions() + userSession.getAverageSpeedWpm()) / (userStatistic.getTotalSessions() + 1));
+            userStatistic.setAverageAccuracy((userStatistic.getAverageAccuracy() * userStatistic.getTotalSessions() + userSession.getAverageAccuracy()) / (userStatistic.getTotalSessions() + 1));
+        }
+        else {
+            userStatistic.setAverageSpeedWpm((userStatistic.getAverageSpeedWpm() * userStatistic.getTotalSessions() - oldWpm + userSession.getAverageSpeedWpm()) / (userStatistic.getTotalSessions()));
+            userStatistic.setAverageAccuracy((userStatistic.getAverageAccuracy() * userStatistic.getTotalSessions() - oldAcc + userSession.getAverageAccuracy()) / (userStatistic.getTotalSessions()));
+        }
 
-        userStatistic.setTotalSessions(userStatistic.getTotalSessions() + 1);
+        userStatistic.setTotalLessons(userStatistic.getTotalLessons() + 1);
         userStatistic.setTotalTimeSpent(userStatistic.getTotalTimeSpent() + userLesson.getTimeSpent());
+
+        if(isNewSession.get())
+            userStatistic.setTotalSessions(userStatistic.getTotalSessions() + 1);
+
+        userStatisticService.updateUserStatistic(userStatistic.getId(), userStatistic);
 
         createUserLesson(userLesson);
     }
@@ -113,5 +123,5 @@ public class UserLessonService {
         }
         userLessonRepository.deleteById(id);
         return true;
-    }*/
+    }
 }

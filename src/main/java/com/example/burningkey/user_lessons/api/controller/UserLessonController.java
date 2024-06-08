@@ -3,13 +3,13 @@ package com.example.burningkey.user_lessons.api.controller;
 import com.example.burningkey.user_lessons.api.dto.UserLessonDto;
 import com.example.burningkey.user_lessons.entity.UserLesson;
 import com.example.burningkey.user_lessons.service.UserLessonService;
-import com.example.burningkey.users.api.controller.UserController;
+import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,23 +19,25 @@ import java.util.stream.Collectors;
 @CrossOrigin // cross domain tomcat's port 8080 and react's 3000
 public class UserLessonController {
 
-/*    @Autowired
+    @Autowired
     private UserLessonService userLessonService;
 
     @Autowired
-    private UserController userController;
+    private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserLessonDto>> getUserLessons(@RequestParam(required = false) Long userId, @RequestParam(required = false) LocalDateTime date) {
+    public ResponseEntity<List<UserLessonDto>> getUserLessons(@RequestParam(required = false) Long userId, @RequestParam(required = false) LocalDate date) {
         List<UserLessonDto> userLessonDtos = userLessonService.getUserLessons(userId, date).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(userLessonDtos);
     }
 
-    @PostMapping
-    public ResponseEntity<String> smartAddUserLesson(@RequestParam(required = true) Long userId, @RequestBody(required = true) UserLesson userLesson) {
-        userLessonService.smartAddUserLesson(userId, userLesson);
+    @PostMapping("/add-lesson/{userId}")
+    public ResponseEntity<String> smartAddUserLesson(@PathVariable Long userId, @RequestBody(required = true) UserLessonDto newUserLessonDto) {
+        UserLesson newUserLesson = convertToEntity(newUserLessonDto);
+        System.out.println(newUserLessonDto.getDate());
+          userLessonService.AddNewUserLesson(userId, newUserLesson);
         return ResponseEntity.ok("Success: added new lesson entry");
     }
 
@@ -64,7 +66,7 @@ public class UserLessonController {
         UserLessonDto userLessonDto = new UserLessonDto();
         userLessonDto.setId(userLesson.getId());
         userLessonDto.setDate(userLesson.getDate());
-        userLessonDto.setUserDto(userController.convertToDto(userLesson.getUser()));
+        userLessonDto.setUserDto(userService.convertToDto(userLesson.getUser()));
         userLessonDto.setTimeSpent(userLesson.getTimeSpent());
         userLessonDto.setAverageSpeedWpm(userLesson.getAverageSpeedWpm());
         userLessonDto.setAverageAccuracy(userLesson.getAverageAccuracy());
@@ -75,12 +77,15 @@ public class UserLessonController {
         UserLesson userLesson = new UserLesson();
         userLesson.setId(userLessonDto.getId());
         userLesson.setDate(userLessonDto.getDate());
-        userLesson.setUser(userController.convertToEntity(userLessonDto.getUserDto()));
+        if(userLessonDto.getUserDto() != null)
+            userLesson.setUser(userService.convertToEntity(userLessonDto.getUserDto()));
+        else
+            userLesson.setUser(null);
         userLesson.setTimeSpent(userLessonDto.getTimeSpent());
         userLesson.setAverageSpeedWpm(userLessonDto.getAverageSpeedWpm());
         userLesson.setAverageAccuracy(userLessonDto.getAverageAccuracy());
         return userLesson;
-    }*/
+    }
 
 
 }

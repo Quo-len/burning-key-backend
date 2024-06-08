@@ -2,14 +2,15 @@ package com.example.burningkey.user_statistics.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalTime;
 
 import com.example.burningkey.users.entity.User;
 
 @Entity(name = "user_statistics")
-@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class UserStatistic {
 
     @Id
@@ -21,12 +22,13 @@ public class UserStatistic {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private Integer totalSessions;
-    private Long totalTimeSpent;
+    private Integer totalSessions = 0;
+    private Integer totalLessons = 0;
+    private Long totalTimeSpent = 0L;
 
-    private Double bestSpeedWpm;
-    private Double bestAccuracy;
+    private Double bestSpeedWpm = 0.0;
+    private Double bestAccuracy = 0.0;
 
-    private Double averageSpeedWpm;
-    private Double averageAccuracy;
+    private Double averageSpeedWpm = 0.0;
+    private Double averageAccuracy = 0.0;
 }

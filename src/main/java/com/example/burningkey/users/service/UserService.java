@@ -1,5 +1,6 @@
 package com.example.burningkey.users.service;
 
+import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
@@ -45,6 +46,10 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public User createUser(User user) {
         return userRepository.save(user);
     }
@@ -64,6 +69,24 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return true;
+    }
+
+    // Convert Entity to DTO
+    public UserDto convertToDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setUserId(user.getId());
+        userDto.setNickname(user.getNickname());
+        userDto.setEmail(user.getEmail());
+        return userDto;
+    }
+
+    // Convert DTO to Entity
+    public User convertToEntity(UserDto userDto) {
+        User user = new User();
+        user.setId(userDto.getUserId());
+        user.setNickname(userDto.getNickname());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 
 }

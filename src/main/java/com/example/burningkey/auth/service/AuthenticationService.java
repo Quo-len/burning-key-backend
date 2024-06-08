@@ -9,7 +9,8 @@ import com.example.burningkey.token.repository.TokenRepository;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import com.example.burningkey.users.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,22 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-    private final JwtService jwtService;
-    private final JavaMailSender mailSender;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TokenRepository tokenRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     public void sendAuthenticationEmail(String email, String token) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -50,6 +60,7 @@ public class AuthenticationService {
             saveUserToken(user, jwtToken, TokenType.BEARER);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
+                    .user(userService.convertToDto(user))
                     .build();
         } else {
             throw new RuntimeException("Invalid token");

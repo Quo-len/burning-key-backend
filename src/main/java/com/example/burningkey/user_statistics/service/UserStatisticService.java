@@ -6,7 +6,6 @@ import com.example.burningkey.users.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +25,14 @@ public class UserStatisticService {
         return userStatisticRepository.findById(id);
     }
 
-    public Optional<UserStatistic> getUserStatisticByUserId(Long userId) {
-        return userStatisticRepository.findByUser_Id(userId);
+    public Optional<UserStatistic> getUserStatisticByUserId(User user) {
+        return Optional.ofNullable(userStatisticRepository.findByUser_Id(user.getId()).orElseGet(() -> createUserStatistic(user)));
     }
 
-    public UserStatistic createUserStatistic(UserStatistic userStatistic) {
-        return userStatisticRepository.save(userStatistic);
+    public UserStatistic createUserStatistic(User user) {
+        UserStatistic newUserSession = new UserStatistic();
+        newUserSession.setUser(user);
+        return userStatisticRepository.save(newUserSession);
     }
 
     public Optional<UserStatistic> updateUserStatistic(Long id, UserStatistic newUserStatistic) {

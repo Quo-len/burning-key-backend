@@ -1,11 +1,11 @@
 package com.example.burningkey.user_sessions.entity;
 
 import com.example.burningkey.users.entity.User;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity(name = "user_sessions")
 @Builder
@@ -23,15 +23,16 @@ public class UserSession {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDate date;
 
-    private Integer numLessons;
-    private Long timeSpent;
+    private Integer numLessons = 0;
+    private Long timeSpent = 0L;
 
-    private Double bestSpeedWpm;
-    private Double bestAccuracy;
+    private Double bestSpeedWpm = 0.0;
+    private Double bestAccuracy = 0.0;
 
-    private Double averageSpeedWpm;
-    private Double averageAccuracy;
+    private Double averageSpeedWpm = 0.0;
+    private Double averageAccuracy = 0.0;
 
 }

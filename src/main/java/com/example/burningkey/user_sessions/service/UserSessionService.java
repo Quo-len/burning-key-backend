@@ -1,8 +1,9 @@
 package com.example.burningkey.user_sessions.service;
 
-import com.example.burningkey.user_lessons.repository.UserLessonRepository;
 import com.example.burningkey.user_sessions.entity.UserSession;
 import com.example.burningkey.user_sessions.repository.UserSessionRepository;
+import com.example.burningkey.user_statistics.service.UserStatisticService;
+import com.example.burningkey.users.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public class UserSessionService {
     private UserSessionRepository userSessionRepository;
 
     @Autowired
-    private UserLessonRepository userLessonRepository;
+    private UserStatisticService userStatisticService;
 
     public long getUserSessionCount() { return userSessionRepository.count(); }
 
@@ -31,12 +32,15 @@ public class UserSessionService {
         }
     }
 
-    public Optional<UserSession> findUserSessionByUserIdAndDate(Long userId, LocalDate date) {
-        return userSessionRepository.findByUser_IdAndDate(userId, date);
+    public Optional<UserSession> getUserSessionByUserAndDate(User user, LocalDate date) {
+        return userSessionRepository.findByUser_IdAndDate(user.getId(), date);
     }
 
-    public UserSession createUserSession(UserSession userSession) {
-        return userSessionRepository.save(userSession);
+    public UserSession createUserSession(User user, LocalDate date) {
+        UserSession newUserSession = new UserSession();
+        newUserSession.setUser(user);
+        newUserSession.setDate(date);
+        return userSessionRepository.save(newUserSession);
     }
 
    /* public UserSession getStatsForDayBrute(User user, LocalDate date) {

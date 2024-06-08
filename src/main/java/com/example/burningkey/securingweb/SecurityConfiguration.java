@@ -1,10 +1,9 @@
 package com.example.burningkey.securingweb;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,12 +14,16 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
-    private final LogoutHandler logoutHandler;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthFilter;
+
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
+
+    @Autowired
+    private LogoutHandler logoutHandler;
 
     // new try
   /*  @Bean
@@ -38,10 +41,8 @@ public class SecurityConfiguration {
         return http.build();
     }*/
 
-
-
     // disable security
-  /*  @Bean
+   /* @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
@@ -65,7 +66,7 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**", "/api/v1/users/**")
+                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**")
                 //  .requestMatchers("/**") // access to all endpoints
                 .permitAll()
                 .anyRequest()
@@ -84,6 +85,7 @@ public class SecurityConfiguration {
 
         return http.build();
     }
+
     // oauth2
   /*  @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

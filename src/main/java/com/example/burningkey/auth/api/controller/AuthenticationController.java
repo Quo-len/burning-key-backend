@@ -6,7 +6,7 @@ import com.example.burningkey.auth.service.AuthenticationService;
 import com.example.burningkey.token.entity.TokenType;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +16,19 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
 @CrossOrigin
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
-    private final UserRepository userRepository;
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/gimme-token/{email}")
     public ResponseEntity<AuthenticationResponse> getWorkingToken(@PathVariable String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
-        User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email, null)));
+        User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email)));
         var jwtToken = authenticationService.generateToken(user, TokenType.WELCOME, 0, 10, 0);
        // authenticationService.sendAuthenticationEmail(user.getEmail(), jwtToken);
         AuthenticationResponse authResponse = authenticationService.authenticateWithToken(jwtToken);
@@ -36,7 +38,7 @@ public class AuthenticationController {
     @PostMapping("/signin/{email}")
     public ResponseEntity<AuthenticationResponse> getLoginLink(@PathVariable String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
-        User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email, null)));
+        User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email)));
         var jwtToken = authenticationService.generateToken(user, TokenType.WELCOME, 0, 10, 0);
         authenticationService.sendAuthenticationEmail(user.getEmail(), jwtToken);
         AuthenticationResponse authResponse = new AuthenticationResponse();

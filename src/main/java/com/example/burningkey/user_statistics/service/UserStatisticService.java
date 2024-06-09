@@ -6,7 +6,6 @@ import com.example.burningkey.users.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +17,7 @@ public class UserStatisticService {
 
     public long getUserStatisticCount() { return userStatisticRepository.count(); }
 
-    public List<UserStatistic> getAllUserStatistics(User user, LocalDate date) {
+    public List<UserStatistic> getAllUserStatistics() {
         return userStatisticRepository.findAll();
     }
 
@@ -26,24 +25,26 @@ public class UserStatisticService {
         return userStatisticRepository.findById(id);
     }
 
-    public Optional<UserStatistic> getUserStatisticByUser(User user) {
-        return userStatisticRepository.findByUser(user);
+    public Optional<UserStatistic> getUserStatisticByUserId(User user) {
+        return Optional.ofNullable(userStatisticRepository.findByUser_Id(user.getId()).orElseGet(() -> createUserStatistic(user)));
     }
 
-    public UserStatistic createUserStatistic(UserStatistic userSession) {
-        return userStatisticRepository.save(userSession);
+    public UserStatistic createUserStatistic(User user) {
+        UserStatistic newUserSession = new UserStatistic();
+        newUserSession.setUser(user);
+        return userStatisticRepository.save(newUserSession);
     }
 
-    public Optional<UserStatistic> updateUserStatistic(Long id, UserStatistic newUserSession) {
-        return userStatisticRepository.findById(id).map(existingText -> {
-            if (newUserSession.getUser() != null) existingText.setUser(newUserSession.getUser());
-            if (newUserSession.getTotalSessions() != null) existingText.setTotalSessions(newUserSession.getTotalSessions());
-            if (newUserSession.getTotalTimeSpent() != null) existingText.setTotalTimeSpent(newUserSession.getTotalTimeSpent());
-            if (newUserSession.getBestSpeedWpm() != null) existingText.setBestSpeedWpm(newUserSession.getBestSpeedWpm());
-            if (newUserSession.getBestAccuracy() != null) existingText.setBestAccuracy(newUserSession.getBestAccuracy());
-            if (newUserSession.getAverageSpeedWpm() != null) existingText.setAverageSpeedWpm(newUserSession.getAverageSpeedWpm());
-            if (newUserSession.getAverageAccuracy() != null) existingText.setAverageAccuracy(newUserSession.getAverageAccuracy());
-            return userStatisticRepository.save(existingText);
+    public Optional<UserStatistic> updateUserStatistic(Long id, UserStatistic newUserStatistic) {
+        return userStatisticRepository.findById(id).map(existingStatistic -> {
+            if (newUserStatistic.getUser() != null) existingStatistic.setUser(newUserStatistic.getUser());
+            if (newUserStatistic.getTotalSessions() != null) existingStatistic.setTotalSessions(newUserStatistic.getTotalSessions());
+            if (newUserStatistic.getTotalTimeSpent() != null) existingStatistic.setTotalTimeSpent(newUserStatistic.getTotalTimeSpent());
+            if (newUserStatistic.getBestSpeedWpm() != null) existingStatistic.setBestSpeedWpm(newUserStatistic.getBestSpeedWpm());
+            if (newUserStatistic.getBestAccuracy() != null) existingStatistic.setBestAccuracy(newUserStatistic.getBestAccuracy());
+            if (newUserStatistic.getAverageSpeedWpm() != null) existingStatistic.setAverageSpeedWpm(newUserStatistic.getAverageSpeedWpm());
+            if (newUserStatistic.getAverageAccuracy() != null) existingStatistic.setAverageAccuracy(newUserStatistic.getAverageAccuracy());
+            return userStatisticRepository.save(existingStatistic);
         });
     }
 

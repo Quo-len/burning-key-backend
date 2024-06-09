@@ -28,19 +28,24 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails, int hours, int minutes, int seconds) {
+        long tokenValidityInMilliseconds = convertToMilliseconds(hours, minutes, seconds);
+        return generateToken(new HashMap<>(), userDetails, tokenValidityInMilliseconds);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long tokenValidityInMilliseconds) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidityInMilliseconds))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    private long convertToMilliseconds(int hours, int minutes, int seconds) {
+        return ((hours * 60L * 60L) + (minutes * 60L) + seconds) * 1000L;
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

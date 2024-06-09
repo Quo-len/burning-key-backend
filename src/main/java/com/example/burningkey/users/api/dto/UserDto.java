@@ -11,6 +11,6 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private Long userId;
-    private String username;
+    private String nickname;
     private String email;
 }

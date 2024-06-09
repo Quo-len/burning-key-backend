@@ -1,5 +1,6 @@
 package com.example.burningkey.users.service;
 
+import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
@@ -20,19 +21,19 @@ public class UserService {
 
         userRepository.save(User.builder()
                 .email("admin@example.com")
-                .username("admin")
+                .nickname("admin")
                 .role(Role.ADMIN)
                 .build());
 
         userRepository.save(User.builder()
                 .email("user@example.com")
-                .username("User1")
+                .nickname("User1")
                 .role(Role.USER)
                 .build());
 
         userRepository.save(User.builder()
                 .email("user2@example.com")
-                .username("User2")
+                .nickname("User2")
                 .role(Role.USER)
                 .build());
     }
@@ -45,13 +46,17 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public User createUser(User user) {
         return userRepository.save(user);
     }
 
     public Optional<User> updateUser(Long id, User newUser) {
         return userRepository.findById(id).map(existingUser -> {
-            if (newUser.getUsername() != null) existingUser.setUsername(newUser.getUsername());
+            if (newUser.getNickname() != null) existingUser.setNickname(newUser.getUsername());
             if (newUser.getEmail() != null) existingUser.setEmail(newUser.getEmail());
             if (newUser.getRole() != null) existingUser.setRole(newUser.getRole());
             return userRepository.save(existingUser);
@@ -64,6 +69,24 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return true;
+    }
+
+    // Convert Entity to DTO
+    public UserDto convertToDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setUserId(user.getId());
+        userDto.setNickname(user.getNickname());
+        userDto.setEmail(user.getEmail());
+        return userDto;
+    }
+
+    // Convert DTO to Entity
+    public User convertToEntity(UserDto userDto) {
+        User user = new User();
+        user.setId(userDto.getUserId());
+        user.setNickname(userDto.getNickname());
+        user.setEmail(userDto.getEmail());
+        return user;
     }
 
 }

@@ -22,32 +22,39 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> userDtos = userService.getAllUsers().stream()
-                .map(this::convertToDto)
+                .map(userService::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(userDtos);
     }
 
-    @GetMapping("/{id}")
+   /* @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         Optional<User> optionalUser = userService.getUserById(id);
         return optionalUser.map(user -> ResponseEntity.ok(convertToDto(user)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }    */
+
+    @GetMapping("/{email}")
+    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+        Optional<User> optionalUser = userService.getUserByEmail(email);
+        return optionalUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Create a new text
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
-        User newUser = convertToEntity(userDto);
+        User newUser = userService.convertToEntity(userDto);
         newUser = userService.createUser(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(newUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.convertToDto(newUser));
     }
 
     // Update an existing user
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto newUserDto) {
-        User newUser = convertToEntity(newUserDto);
+        User newUser = userService.convertToEntity(newUserDto);
         Optional<User> updatedUser = userService.updateUser(id, newUser);
-        return updatedUser.map(user -> ResponseEntity.ok(convertToDto(user)))
+        return updatedUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -56,24 +63,6 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
-    }
-
-    // Convert Entity to DTO
-    private UserDto convertToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(user.getId());
-        userDto.setUsername(user.getUsername());
-        userDto.setEmail(user.getEmail());
-        return userDto;
-    }
-
-    // Convert DTO to Entity
-    private User convertToEntity(UserDto userDto) {
-        User user = new User();
-        user.setId(userDto.getUserId());
-        user.setUsername(userDto.getEmail());
-        user.setEmail(userDto.getEmail());
-        return user;
     }
 
 }

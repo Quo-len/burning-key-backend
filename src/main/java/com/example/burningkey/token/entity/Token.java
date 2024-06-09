@@ -18,6 +18,10 @@ public class Token {
     @GeneratedValue
     public Integer id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    public User user;
+
     @Column(unique = true)
     public String token;
 
@@ -28,7 +32,4 @@ public class Token {
 
     public boolean expired;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    public User user;
 }

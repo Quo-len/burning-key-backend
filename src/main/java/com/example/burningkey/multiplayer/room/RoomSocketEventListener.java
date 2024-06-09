@@ -4,7 +4,6 @@ import com.example.burningkey.multiplayer.rooms.RoomsSocketEventListener;
 import com.example.burningkey.multiplayer.service.RoomDTO;
 import com.example.burningkey.multiplayer.service.RoomService;
 import com.example.burningkey.multiplayer.service.UserDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -12,12 +11,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class RoomSocketEventListener extends TextWebSocketHandler {
 
@@ -71,7 +70,8 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
 
                 if (room.getStart().get() <= 0) {
                     sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
-                            "type", "STARTED"
+                            "type", "STARTED",
+                            "startedAt", room.getStartedAt()
                     ))), session, uid);
                     return;
                 }
@@ -80,7 +80,6 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                         "data", room.getActiveUsers(),
                         "sessionId", session.getId()
                 ))), session, uid);
-
                 sendBroadcastMessageExcept(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT",
                         "data", user
@@ -172,7 +171,6 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 .findFirst()
                 .orElseThrow();
 
-        System.out.println("room: " + room.getActiveUsers().size());
         room.getActiveUsers().stream()
                 .map(UserDTO::getSession)
                 .forEach(v -> {

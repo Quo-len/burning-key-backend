@@ -7,10 +7,12 @@ import com.example.burningkey.token.entity.TokenType;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
@@ -46,14 +48,14 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.OK).body(authResponse);
     }
 
-    @PostMapping("/authenticate/{token}")
+    @GetMapping("/authenticate/{token}")
     public ResponseEntity<AuthenticationResponse> authorize(@PathVariable("token") String token) throws URISyntaxException {
         AuthenticationResponse authResponse = authenticationService.authenticateWithToken(token);
-      /*  URI uri = new URI("http://localhost:5173/");
+        URI uri = new URI("http://localhost:5173/?token=" + authResponse.getToken());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(uri);
-        return ResponseEntity.status(HttpStatus.SEE_OTHER).headers(httpHeaders).body(authResponse);*/
-        AuthenticationResponse authResponse1 = new AuthenticationResponse();
-        return ResponseEntity.status(HttpStatus.SEE_OTHER).body(authResponse);
+        return ResponseEntity.status(HttpStatus.SEE_OTHER).headers(httpHeaders).body(authResponse);
+        // AuthenticationResponse authResponse1 = new AuthenticationResponse();
+        // return ResponseEntity.status(HttpStatus.SEE_OTHER).body(authResponse);
     }
 }

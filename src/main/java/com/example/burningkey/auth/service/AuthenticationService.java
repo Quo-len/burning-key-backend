@@ -47,6 +47,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .email(request.getEmail())
                 .role(Role.USER)
+                .nickname(userService.generateNickname())
                 .build();
         return userRepository.save(user);
     }

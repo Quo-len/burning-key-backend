@@ -19,11 +19,13 @@ public class RoomService {
         roomService = this;
     }
 
-    public RoomDTO createRoom(String title, AtomicInteger timer) {
+    public RoomDTO createRoom(String title, AtomicInteger timer, Integer maxAmountOfPlayers, String text) {
         RoomDTO newRoom = RoomDTO.builder()
                 .uid(getUUID())
                 .activeUsers(Collections.synchronizedList(new ArrayList<>()))
                 .start(timer)
+                .text(text)
+                .maxAmountOfPlayers(maxAmountOfPlayers)
                 .executorService(Executors.newSingleThreadExecutor())
                 .playersPosition(new HashMap<>())
                 .isTimerCountDown(false)

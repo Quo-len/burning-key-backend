@@ -31,6 +31,8 @@ public class RoomDTO {
     private Map<String, Long> playersPosition;
     private long startedAt;
     private boolean isTimerCountDown;
+    private Integer maxAmountOfPlayers;
+    private String text;
     @JsonIgnore
     private ExecutorService executorService;
 

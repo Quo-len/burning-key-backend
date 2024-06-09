@@ -58,8 +58,17 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
             return;
         }
 
+
+
         switch (type) {
             case "CONNECT":
+                RoomDTO roomCheck = roomService.getRoomById(uid);
+                if (roomCheck.getActiveUsers().size() >= roomCheck.getMaxAmountOfPlayers()) {
+                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                            "type", "ROOM_FILLED"
+                    ))));
+                    return;
+                }
                 String username = (String) clientMessage.get("username");
                 session.getAttributes().put("uid", uid);
                 RoomDTO room = roomService.addMember(username, uid, session);
@@ -78,18 +87,23 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT_USER",
                         "data", room.getActiveUsers(),
-                        "sessionId", session.getId()
+                        "sessionId", session.getId(),
+                        "text", room.getText()
                 ))), session, uid);
                 sendBroadcastMessageExcept(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", "CONNECT",
                         "data", user
                 ))), session, uid);
-                RoomsSocketEventListener.roomsSocketEventListener.broadCastUserConnect(uid, user.getUsername(), room.isTimerCountDown());
+                if (room.getActiveUsers().size() >= 2) {
+                    room.setTimerCountDown(true);
+                    RoomsSocketEventListener.roomsSocketEventListener.broadCastUserConnect(uid, user.getUsername(), room.isTimerCountDown());
+                } else {
+                    RoomsSocketEventListener.roomsSocketEventListener.broadCastUserConnect(uid, user.getUsername(), room.isTimerCountDown());
+                }
 
                 ExecutorService executorService = timer.computeIfAbsent(uid, k -> Executors.newSingleThreadExecutor());
                 timer.put(uid, executorService);
                 if (room.getActiveUsers().size() >= 2) {
-                    room.setTimerCountDown(true);
                     executorService.submit(() -> {
                         while (room.getStart().get() >= 0) {
                             try {

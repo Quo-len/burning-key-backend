@@ -57,17 +57,21 @@ public class RoomsSocketEventListener extends TextWebSocketHandler {
         Map<String, Object> clientMessage = objectMapper.readValue(message.getPayload(), Map.class);
 
         String type = (String) clientMessage.get("type");
-        String username = (String) clientMessage.get("username");
+//        String username = (String) clientMessage.get("username");
         String title = (String) clientMessage.get("title");
-        session.getAttributes().put("username", username);
+//        session.getAttributes().put("username", username);
         Random random = new Random();
-        AtomicInteger startTimer = new AtomicInteger(5);
+        Integer timeToStart = (Integer) clientMessage.get("timeToStart");
+        Integer maxAmountOfPlayers = (Integer) clientMessage.get("maxAmountOfPlayers");
+        String text = (String) clientMessage.get("text");
+        AtomicInteger startTimer = new AtomicInteger(timeToStart);
         switch (type) {
             case "CREATE":
-                RoomDTO room = roomService.createRoom(title, startTimer);
+                RoomDTO room = roomService.createRoom(title, startTimer, maxAmountOfPlayers, text);
                 RoomDTO newRoom = RoomDTO.builder()
                         .uid(room.getUid())
                         .title(title)
+                        .maxAmountOfPlayers(maxAmountOfPlayers)
                         .start(startTimer)
                         .build();
                 sendBroadcastMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(

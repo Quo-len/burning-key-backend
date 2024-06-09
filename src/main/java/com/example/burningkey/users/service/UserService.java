@@ -5,10 +5,17 @@ import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -69,6 +76,49 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return true;
+    }
+
+    public String generateNickname() {
+        Resource adjectivesResource = new ClassPathResource("nicknames/adjectives.txt"); // 1143
+        Resource animalsResource = new ClassPathResource("nicknames/animals.txt"); // 354
+
+        final int adjectivesCount = 1143;
+        final int animalsCount = 354;
+
+        File adjectivesFile;
+        File animalsFile;
+        try {
+            adjectivesFile = adjectivesResource.getFile();
+            animalsFile = animalsResource.getFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String adjectivesPath = adjectivesFile.getAbsolutePath();
+        String animalsPath = animalsFile.getAbsolutePath();
+
+        Random rand = new Random();
+        int randIdx = rand.nextInt(0, adjectivesCount);
+        String adjective = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(adjectivesPath))) {
+            for (int i = 0; i <= randIdx; i++) {
+                adjective = br.readLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        randIdx = rand.nextInt(0, animalsCount);
+        String animal = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(animalsPath))) {
+            for (int i = 0; i <= randIdx; i++) {
+                animal = br.readLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        String nickname = adjective.substring(0, 1).toUpperCase() + adjective.substring(1) + " " + animal.substring(0, 1).toUpperCase() + animal.substring(1);
+
+        return nickname.trim();
     }
 
     // Convert Entity to DTO

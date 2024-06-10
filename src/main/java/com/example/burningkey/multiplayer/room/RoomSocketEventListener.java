@@ -36,28 +36,28 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
         String uid = (String) clientMessage.get("uid");
 
 //        ExecutorService executor = roomThread.computeIfAbsent(uid, k -> Executors.newSingleThreadExecutor());
-        ExecutorService executor = roomService.getRoomById(uid).getExecutorService();
-        executor.submit(() -> {
-            try {
-                handleRoomAction(session, clientMessage, uid);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        try {
+            ExecutorService executor = roomService.getRoomById(uid).getExecutorService();
+            executor.submit(() -> {
+                try {
+                    handleRoomAction(session, clientMessage, uid);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (NoSuchElementException e) {
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                    "type", "EXPIRED_ROOM"
+            ))));
+            e.printStackTrace();
+        }
+
 
     }
 
     private void handleRoomAction(WebSocketSession session, Map<String, Object> clientMessage, String uid) throws IOException, InterruptedException {
 
         String type = (String) clientMessage.get("type");
-
-        if (!roomService.isRoomExist(uid)) {
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
-                    "type", "EXPIRED_ROOM"
-            ))));
-            return;
-        }
-
 
 
         switch (type) {

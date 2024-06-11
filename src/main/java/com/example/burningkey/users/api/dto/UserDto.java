@@ -13,4 +13,5 @@ public class UserDto {
     private Long userId;
     private String nickname;
     private String email;
+    private String imageUrl;
 }

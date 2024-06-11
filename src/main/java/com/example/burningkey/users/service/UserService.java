@@ -12,11 +12,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -68,6 +72,7 @@ public class UserService {
             if (newUser.getNickname() != null) existingUser.setNickname(newUser.getNickname());
             if (newUser.getEmail() != null) existingUser.setEmail(newUser.getEmail());
             if (newUser.getRole() != null) existingUser.setRole(newUser.getRole());
+            if (newUser.getImageUrl() != null) existingUser.setImageUrl(newUser.getImageUrl());
             return userRepository.save(existingUser);
         });
     }
@@ -78,6 +83,36 @@ public class UserService {
         }
         userRepository.deleteById(id);
         return true;
+    }
+
+    public void saveImage(User user , MultipartFile file) {
+        try {
+            String fileName = file.getOriginalFilename();
+            int dotIndex = fileName.lastIndexOf('.');
+            String extension = (dotIndex > 0) ? fileName.substring(dotIndex + 1) : "";
+
+            fileName = user.getEmail() + "." + extension;
+
+            Path resourceDirectory = Paths.get("src","main", "resources", "images");
+            String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+
+            if (!Files.exists(Path.of(absolutePath))) {
+                Files.createDirectories(Path.of(absolutePath));
+            }
+
+            Path filePath = Paths.get(absolutePath, fileName);
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+
+            Files.copy(file.getInputStream(), filePath);
+
+            user.setImageUrl(fileName);
+            updateUser(user.getId(), user);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save image: " + e.getMessage());
+        }
     }
 
     public String generateNickname() {
@@ -129,6 +164,7 @@ public class UserService {
         userDto.setUserId(user.getId());
         userDto.setNickname(user.getNickname());
         userDto.setEmail(user.getEmail());
+        userDto.setImageUrl(user.getImageUrl());
         return userDto;
     }
 
@@ -138,6 +174,7 @@ public class UserService {
         user.setId(userDto.getUserId());
         user.setNickname(userDto.getNickname());
         user.setEmail(userDto.getEmail());
+        user.setImageUrl(userDto.getImageUrl());
         return user;
     }
 

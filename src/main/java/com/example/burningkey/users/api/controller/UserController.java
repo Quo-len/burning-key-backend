@@ -7,11 +7,19 @@ import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.print.attribute.standard.Media;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.nio.file.Files;
 import java.util.stream.Collectors;
 
 @RestController
@@ -76,6 +84,39 @@ public class UserController {
         Optional<User> updatedUser = userService.updateUser(id, newUser);
         return updatedUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/image")
+    public ResponseEntity<Void> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        Optional<User> userOptional = userService.getUserById(id);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        User user = userOptional.get();
+
+        userService.saveImage(user, file);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{userId}/image")
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Long userId) throws IOException {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isEmpty() || userOptional.get().getImageUrl() == null) {
+            return ResponseEntity.notFound().build(); // User not found or no image URL
+        }
+
+        String imageUrl = userOptional.get().getImageUrl();
+
+        Resource resource = new ClassPathResource("images/" + imageUrl);
+        System.out.println("root + url " + resource.getFile().getAbsoluteFile());
+        try {
+            byte[] imageData = Files.readAllBytes(resource.getFile().toPath());
+
+            return ResponseEntity.ok().body(imageData);
+        } catch (IOException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Delete a user

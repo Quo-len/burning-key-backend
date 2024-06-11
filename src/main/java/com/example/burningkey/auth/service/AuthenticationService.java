@@ -48,6 +48,7 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .role(Role.USER)
                 .nickname(userService.generateNickname())
+                .imageUrl("default.png")
                 .build();
         return userRepository.save(user);
     }

@@ -1,5 +1,6 @@
 package com.example.burningkey.user_statistics.service;
 
+import com.example.burningkey.user_statistics.api.dto.LeaderboardEntryDto;
 import com.example.burningkey.user_statistics.entity.UserStatistic;
 import com.example.burningkey.user_statistics.repository.UserStatisticRepository;
 import com.example.burningkey.users.entity.User;
@@ -56,8 +57,8 @@ public class UserStatisticService {
         return true;
     }
 
-    public List<UserStatistic> getTop1000ByBestWpmAndAccuracy() {
-        return userStatisticRepository.findTop100ByBestWpmAndAccuracy();
+    public List<LeaderboardEntryDto> getTop1000ByBestWpmAndAccuracy() {
+        return userStatisticRepository.findTop1000ByBestWpmAndAccuracy();
     }
 
 }

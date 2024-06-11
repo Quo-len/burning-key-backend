@@ -1,5 +1,6 @@
 package com.example.burningkey.user_statistics.api.controller;
 
+import com.example.burningkey.user_statistics.api.dto.LeaderboardEntryDto;
 import com.example.burningkey.user_statistics.api.dto.UserStatisticDto;
 import com.example.burningkey.user_statistics.entity.UserStatistic;
 import com.example.burningkey.user_statistics.service.UserStatisticService;
@@ -33,10 +34,8 @@ public class UserStatisticController {
     }
 
     @GetMapping("/leaderboard")
-    public ResponseEntity<List<UserStatisticDto>> getTop1000ByBestWpmAndAccuracy() {
-        List<UserStatisticDto> leaderboard = userStatisticService.getTop1000ByBestWpmAndAccuracy().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<LeaderboardEntryDto>> getTop1000ByBestWpmAndAccuracy() {
+        List<LeaderboardEntryDto> leaderboard = userStatisticService.getTop1000ByBestWpmAndAccuracy();
         return ResponseEntity.ok(leaderboard);
     }
 

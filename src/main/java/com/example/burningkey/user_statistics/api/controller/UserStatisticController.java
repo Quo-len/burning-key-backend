@@ -32,6 +32,14 @@ public class UserStatisticController {
         return ResponseEntity.ok(userStatisticDtos);
     }
 
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<UserStatisticDto>> getTop1000ByBestWpmAndAccuracy() {
+        List<UserStatisticDto> leaderboard = userStatisticService.getTop1000ByBestWpmAndAccuracy().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(leaderboard);
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<UserStatisticDto> getUserStatisticsByUserId(@PathVariable Long userId) {
         Optional<User> optionalUser = userService.getUserById(userId);

@@ -1,6 +1,8 @@
 package com.example.burningkey.users.api.controller;
 
 import com.example.burningkey.securingweb.JwtService;
+import com.example.burningkey.texts.api.dto.TextDto;
+import com.example.burningkey.texts.entity.Text;
 import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.service.UserService;
@@ -65,6 +67,15 @@ public class UserController {
     @GetMapping("/nickname")
     public ResponseEntity<String> getNewNickname() {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.generateNickname());
+    }
+
+    // Update an existing user
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto newUserDto) {
+        User newUser = userService.convertToEntity(newUserDto);
+        Optional<User> updatedUser = userService.updateUser(id, newUser);
+        return updatedUser.map(user -> ResponseEntity.ok(userService.convertToDto(user)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Delete a user

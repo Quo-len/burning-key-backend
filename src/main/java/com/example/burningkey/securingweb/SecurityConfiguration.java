@@ -67,7 +67,7 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**")
+                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**", "/api/v1/user-statistics/leaderboard")
                 //  .requestMatchers("/**") // access to all endpoints
                 .permitAll()
                 .requestMatchers("/multiplayer/**")

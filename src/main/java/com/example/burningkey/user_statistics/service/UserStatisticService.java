@@ -56,5 +56,8 @@ public class UserStatisticService {
         return true;
     }
 
+    public List<UserStatistic> getTop1000ByBestWpmAndAccuracy() {
+        return userStatisticRepository.findTop100ByBestWpmAndAccuracy();
+    }
 
 }

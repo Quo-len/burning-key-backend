@@ -9,6 +9,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -63,7 +65,7 @@ public class UserService {
 
     public Optional<User> updateUser(Long id, User newUser) {
         return userRepository.findById(id).map(existingUser -> {
-            if (newUser.getNickname() != null) existingUser.setNickname(newUser.getUsername());
+            if (newUser.getNickname() != null) existingUser.setNickname(newUser.getNickname());
             if (newUser.getEmail() != null) existingUser.setEmail(newUser.getEmail());
             if (newUser.getRole() != null) existingUser.setRole(newUser.getRole());
             return userRepository.save(existingUser);

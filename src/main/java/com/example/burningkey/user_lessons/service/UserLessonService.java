@@ -37,10 +37,8 @@ public class UserLessonService {
     public void populateLessonsToUsers() {
         Random rand  = new Random();
         for (int i = 1; i <= 18; i++) {
-            User user = userService.getUserById(Long.valueOf(i)).get();
-            System.out.println(user.getEmail());
+            User user = userService.getUserById((long) i).get();
             for (int j = 0; j < rand.nextInt(1,4); j++) {
-                System.out.println("addlesson");
                 AddNewUserLesson(user.getId(), new UserLesson(user, LocalDate.now().minusDays(1), rand.nextLong(5,200), rand.nextDouble(40,130), rand.nextDouble(40,100)));
             }
         }

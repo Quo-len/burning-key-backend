@@ -28,7 +28,6 @@ public class UserLessonController {
 
     @PostMapping("/populate")
     public ResponseEntity<Void> populateUsersWithLessons() {
-        System.out.println("STARTAT");
         userLessonService.populateLessonsToUsers();
         return null;
     }

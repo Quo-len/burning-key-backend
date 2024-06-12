@@ -27,4 +27,12 @@ public class UserLesson {
 
     private Double averageSpeedWpm;
     private Double averageAccuracy;
+
+    public UserLesson(User user, LocalDate date, Long timeSpent, Double averageSpeedWpm, Double averageAccuracy) {
+        this.user = user;
+        this.date = date;
+        this.timeSpent = timeSpent;
+        this.averageSpeedWpm = averageSpeedWpm;
+        this.averageAccuracy = averageAccuracy;
+    }
 }

@@ -8,9 +8,10 @@ import com.example.burningkey.token.entity.TokenType;
 import com.example.burningkey.token.repository.TokenRepository;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
-import com.example.burningkey.users.repository.UserRepository;
 import com.example.burningkey.users.service.UserService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,6 @@ import java.util.Optional;
 
 @Service
 public class AuthenticationService {
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private UserService userService;
@@ -35,27 +33,47 @@ public class AuthenticationService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @PostConstruct
+    public void addUsers() {
+        User user1 = register(new RegisterRequest("parfesa.oleksandr1122@vu.cdu.edu.ua"));
+        generateToken(user1, TokenType.WELCOME, 0, 10, 0);
+
+        User user2 = register(new RegisterRequest("no email"));
+        generateToken(user2, TokenType.WELCOME, 0, 10, 0);
+
+        User user3 = register(new RegisterRequest("kotenko.vadym1121@vu.cdu.edu.ua"));
+        generateToken(user3, TokenType.WELCOME, 0, 10, 0);
+
+        User user4 = register(new RegisterRequest("bondar.vladislav1121@vu.cdu.edu.ua"));
+        generateToken(user4, TokenType.WELCOME, 0, 10, 0);
+
+        User user5 = register(new RegisterRequest("povzun.andrii1121@vu.cdu.edu.ua"));
+        generateToken(user5, TokenType.WELCOME, 0, 10, 0);
+
+        User user6 = register(new RegisterRequest("insert email here"));
+        generateToken(user6, TokenType.WELCOME, 0, 10, 0);
+
+        for (int i = 0; i < 12; i++) {
+            User newUser = register(new RegisterRequest("user" + i));
+            generateToken(newUser, TokenType.WELCOME, 0, 10, 0);
+        }
+    }
+
     public void sendAuthenticationEmail(String email, String token) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
         mailMessage.setSubject("Your signin link");
-        mailMessage.setText(String.format("Hello!\nAccess your account here: http://localhost:8080/api/v1/auth/authenticate/%s\nExpires in 10 minutes", token));
+        mailMessage.setText(String.format("Hello!\nAccess your account here: http://25.36.165.69:8080/api/v1/auth/authenticate/%s\nExpires in 10 minutes", token));
         mailSender.send(mailMessage);
     }
 
     public User register(RegisterRequest request) {
-        var user = User.builder()
-                .email(request.getEmail())
-                .role(Role.USER)
-                .nickname(userService.generateNickname())
-                .imageUrl("default.png")
-                .build();
-        return userRepository.save(user);
+        return userService.createUser(request);
     }
 
     public AuthenticationResponse authenticateWithToken(String token) {
         String email = jwtService.extractUsername(token);
-        var user = userRepository.findByEmail(email).orElseThrow();
+        var user = userService.getUserByEmail(email).orElseThrow();
         if (validateWelcomeToken(token)) {
             var jwtToken = jwtService.generateToken(user, 720,0,0); // 30 days
             revokeAllUserTokens(user);

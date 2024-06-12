@@ -14,10 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,26 +84,41 @@ public class UserService {
 
     public void saveImage(User user , MultipartFile file) {
         try {
-            String fileName = file.getOriginalFilename();
+            String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
             int dotIndex = fileName.lastIndexOf('.');
             String extension = (dotIndex > 0) ? fileName.substring(dotIndex + 1) : "";
 
+            if (extension.equals("jpg"))
+                extension = "jpeg";
+
             fileName = user.getEmail() + "." + extension;
 
-            Path resourceDirectory = Paths.get("src","main", "resources", "images");
+            Path resourceDirectory = Paths.get("src","main", "java", "com", "example", "burningkey", "users", "images");
             String absolutePath = resourceDirectory.toFile().getAbsolutePath();
-
-            if (!Files.exists(Path.of(absolutePath))) {
-                Files.createDirectories(Path.of(absolutePath));
-            }
-
             Path filePath = Paths.get(absolutePath, fileName);
 
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
+            Path filePathPng = Paths.get(absolutePath, user.getEmail() + ".png");
+            Path filePathGif = Paths.get(absolutePath, user.getEmail() + ".gif");
+            Path filePathJpeg = Paths.get(absolutePath, user.getEmail() + ".jpeg");
+
+            if (Files.exists(filePathPng)) {
+                Files.delete(filePathPng);
+            }
+            if (Files.exists(filePathGif)) {
+                Files.delete(filePathGif);
+            }
+            if (Files.exists(filePathJpeg)) {
+                Files.delete(filePathJpeg);
             }
 
-            Files.copy(file.getInputStream(), filePath);
+            try (InputStream inputStream = file.getInputStream();
+                 FileOutputStream outputStream = new FileOutputStream(filePath.toFile(), false)) { // Set to write mode
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            }
 
             user.setImageUrl(fileName);
             updateUser(user.getId(), user);

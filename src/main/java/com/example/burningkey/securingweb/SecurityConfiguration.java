@@ -49,7 +49,7 @@ public class SecurityConfiguration {
     }*/
 
     // disable security
-   /* @Bean
+ /*   @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
@@ -75,7 +75,7 @@ public class SecurityConfiguration {
                 .cors()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**", "/api/v1/user-statistics/leaderboard")
+                .requestMatchers("/api/v1/auth/**", "/api/v1/texts/**", "/api/v1/user-statistics/leaderboard", "/api/v1/users/image/**" )
                 .permitAll()
                 .requestMatchers("/multiplayer/**")
                 .permitAll()
@@ -107,20 +107,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-    // oauth2
-  /*  @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/").permitAll();
-                    auth.requestMatchers("/favicon.ico").permitAll();
-                    auth.anyRequest().authenticated();
-                })
-                .oauth2Login(withDefaults())
-                .formLogin(withDefaults())
-                .build();
-    }*/
 
 }
 

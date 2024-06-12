@@ -1,25 +1,24 @@
 package com.example.burningkey.users.api.controller;
 
 import com.example.burningkey.securingweb.JwtService;
-import com.example.burningkey.texts.api.dto.TextDto;
-import com.example.burningkey.texts.entity.Text;
 import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.attribute.standard.Media;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.nio.file.Files;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,7 +85,7 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{id}/image")
+    @PostMapping("/image/{id}")
     public ResponseEntity<Void> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         Optional<User> userOptional = userService.getUserById(id);
         if (userOptional.isEmpty()) {
@@ -99,21 +98,36 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{userId}/image")
+    @GetMapping("/image/{userId}")
     public ResponseEntity<byte[]> getUserImage(@PathVariable Long userId) throws IOException {
         Optional<User> userOptional = userService.getUserById(userId);
         if (userOptional.isEmpty() || userOptional.get().getImageUrl() == null) {
             return ResponseEntity.notFound().build(); // User not found or no image URL
         }
+        User user = userOptional.get();
 
         String imageUrl = userOptional.get().getImageUrl();
+        int dotIndex = imageUrl.lastIndexOf('.');
+        String extension = (dotIndex > 0) ? imageUrl.substring(dotIndex + 1) : "";
 
-        Resource resource = new ClassPathResource("images/" + imageUrl);
-        System.out.println("root + url " + resource.getFile().getAbsoluteFile());
+        MediaType mediaType = MediaType.IMAGE_PNG;
+        mediaType = switch (extension) {
+            case ".gif" -> MediaType.IMAGE_GIF;
+            case "jpeg" -> MediaType.IMAGE_JPEG;
+            default -> mediaType;
+        };
+
+        Path resourceDirectory = Paths.get("src","main", "java", "com", "example", "burningkey", "users", "images");
+        String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+        String filePath = absolutePath + "/" + user.getImageUrl();
+        System.out.println("file path " + filePath);
         try {
-            byte[] imageData = Files.readAllBytes(resource.getFile().toPath());
-
-            return ResponseEntity.ok().body(imageData);
+            byte[] imageData = Files.readAllBytes(Path.of(filePath));
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+            headers.add("Pragma", "no-cache");
+            headers.add("Expires", "0");
+            return ResponseEntity.ok().headers(headers).contentType(mediaType).body(imageData);
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         }

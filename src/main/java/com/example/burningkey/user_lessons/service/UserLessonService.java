@@ -9,14 +9,17 @@ import com.example.burningkey.user_statistics.service.UserStatisticService;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
+@DependsOn({"authenticationService", "userService", "userSessionService", "userStatisticService"})
 public class UserLessonService {
 
     @Autowired
@@ -30,6 +33,16 @@ public class UserLessonService {
 
     @Autowired
     private UserService userService;
+
+    public void populateLessonsToUsers() {
+        Random rand  = new Random();
+        for (int i = 1; i <= 18; i++) {
+            User user = userService.getUserById((long) i).get();
+            for (int j = 0; j < rand.nextInt(1,4); j++) {
+                AddNewUserLesson(user.getId(), new UserLesson(user, LocalDate.now().minusDays(1), rand.nextLong(5,200), rand.nextDouble(40,130), rand.nextDouble(40,100)));
+            }
+        }
+    }
 
     public long getUserLessonCount() { return userLessonRepository.count(); }
 
@@ -56,6 +69,9 @@ public class UserLessonService {
         }
         User user = userOptional.get();
         userLesson.setUser(user);
+
+        if (userLesson.getDate() == null)
+            userLesson.setDate(LocalDate.now());
 
         // update session of given day
         AtomicBoolean isNewSession = new AtomicBoolean(false);

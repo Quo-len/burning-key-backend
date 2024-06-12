@@ -5,6 +5,7 @@ import com.example.burningkey.user_lessons.entity.UserLesson;
 import com.example.burningkey.user_lessons.service.UserLessonService;
 import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,12 @@ public class UserLessonController {
     @Autowired
     private UserService userService;
 
+    @PostMapping("/populate")
+    public ResponseEntity<Void> populateUsersWithLessons() {
+        userLessonService.populateLessonsToUsers();
+        return null;
+    }
+
     @GetMapping
     public ResponseEntity<List<UserLessonDto>> getUserLessons(@RequestParam(required = false) Long userId, @RequestParam(required = false) LocalDate date) {
         List<UserLessonDto> userLessonDtos = userLessonService.getUserLessons(userId, date).stream()
@@ -36,8 +43,7 @@ public class UserLessonController {
     @PostMapping("/add-lesson/{userId}")
     public ResponseEntity<String> smartAddUserLesson(@PathVariable Long userId, @RequestBody(required = true) UserLessonDto newUserLessonDto) {
         UserLesson newUserLesson = convertToEntity(newUserLessonDto);
-        System.out.println(newUserLessonDto.getDate());
-          userLessonService.AddNewUserLesson(userId, newUserLesson);
+        userLessonService.AddNewUserLesson(userId, newUserLesson);
         return ResponseEntity.ok("Success: added new lesson entry");
     }
 

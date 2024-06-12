@@ -1,5 +1,12 @@
 package com.example.burningkey.users.service;
 
+import com.example.burningkey.auth.entity.AuthenticationResponse;
+import com.example.burningkey.auth.entity.RegisterRequest;
+import com.example.burningkey.auth.service.AuthenticationService;
+import com.example.burningkey.token.entity.TokenType;
+import com.example.burningkey.user_lessons.entity.UserLesson;
+import com.example.burningkey.user_lessons.repository.UserLessonRepository;
+import com.example.burningkey.user_lessons.service.UserLessonService;
 import com.example.burningkey.users.api.dto.UserDto;
 import com.example.burningkey.users.entity.Role;
 import com.example.burningkey.users.entity.User;
@@ -9,6 +16,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -26,28 +35,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @PostConstruct
-    public void addUsers() {
-
-        userRepository.save(User.builder()
-                .email("admin@example.com")
-                .nickname("admin")
-                .role(Role.ADMIN)
-                .build());
-
-        userRepository.save(User.builder()
-                .email("user@example.com")
-                .nickname("User1")
-                .role(Role.USER)
-                .build());
-
-        userRepository.save(User.builder()
-                .email("user2@example.com")
-                .nickname("User2")
-                .role(Role.USER)
-                .build());
-    }
-
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -62,6 +49,16 @@ public class UserService {
 
     public User createUser(User user) {
         return userRepository.save(user);
+    }
+
+    public User createUser(RegisterRequest request) {
+        var user = User.builder()
+                .email(request.getEmail())
+                .role(Role.USER)
+                .nickname(generateNickname())
+                .imageUrl("default.png")
+                .build();
+        return createUser(user);
     }
 
     public Optional<User> updateUser(Long id, User newUser) {
@@ -82,7 +79,7 @@ public class UserService {
         return true;
     }
 
-    public void saveImage(User user , MultipartFile file) {
+    public void saveImage(User user, MultipartFile file) {
         try {
             String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
             int dotIndex = fileName.lastIndexOf('.');
@@ -93,7 +90,7 @@ public class UserService {
 
             fileName = user.getEmail() + "." + extension;
 
-            Path resourceDirectory = Paths.get("src","main", "java", "com", "example", "burningkey", "users", "images");
+            Path resourceDirectory = Paths.get("src", "main", "java", "com", "example", "burningkey", "users", "images");
             String absolutePath = resourceDirectory.toFile().getAbsolutePath();
             Path filePath = Paths.get(absolutePath, fileName);
 

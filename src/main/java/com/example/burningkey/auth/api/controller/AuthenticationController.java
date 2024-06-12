@@ -6,6 +6,7 @@ import com.example.burningkey.auth.service.AuthenticationService;
 import com.example.burningkey.token.entity.TokenType;
 import com.example.burningkey.users.entity.User;
 import com.example.burningkey.users.repository.UserRepository;
+import com.example.burningkey.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,11 +26,11 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping("/gimme-token/{email}")
     public ResponseEntity<AuthenticationResponse> getWorkingToken(@PathVariable String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        Optional<User> userOpt = userService.getUserByEmail(email);
         User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email)));
         var jwtToken = authenticationService.generateToken(user, TokenType.WELCOME, 0, 10, 0);
        // authenticationService.sendAuthenticationEmail(user.getEmail(), jwtToken);
@@ -39,7 +40,7 @@ public class AuthenticationController {
 
     @PostMapping("/signin/{email}")
     public ResponseEntity<AuthenticationResponse> getLoginLink(@PathVariable String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        Optional<User> userOpt = userService.getUserByEmail(email);
         User user = userOpt.orElseGet(() -> authenticationService.register(new RegisterRequest(email)));
         var jwtToken = authenticationService.generateToken(user, TokenType.WELCOME, 0, 10, 0);
         authenticationService.sendAuthenticationEmail(user.getEmail(), jwtToken);
@@ -51,7 +52,7 @@ public class AuthenticationController {
     @GetMapping("/authenticate/{token}")
     public ResponseEntity<AuthenticationResponse> authorize(@PathVariable("token") String token) throws URISyntaxException {
         AuthenticationResponse authResponse = authenticationService.authenticateWithToken(token);
-        URI uri = new URI("http://localhost:5173/?token=" + authResponse.getToken());
+        URI uri = new URI("http://25.36.165.69:5173/?token=" + authResponse.getToken());
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(uri);
         return ResponseEntity.status(HttpStatus.SEE_OTHER).headers(httpHeaders).body(authResponse);

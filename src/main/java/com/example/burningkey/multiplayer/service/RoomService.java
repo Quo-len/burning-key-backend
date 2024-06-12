@@ -53,12 +53,13 @@ public class RoomService {
                 .findFirst()
                 .orElseThrow();
     }
-    public RoomDTO addMember(String username, String uid, WebSocketSession session) {
+    public RoomDTO addMember(String username, String uid, WebSocketSession session, String userImage) {
         UserDTO newUser = UserDTO.builder()
                 .username(username)
                 .session(session)
                 .sessionId(session.getId())
                 .completeText(0.0)
+                .userImage(userImage)
                 .currentWordPosition(0)
                 .build();
 

@@ -111,10 +111,14 @@ public class UserController {
         String extension = (dotIndex > 0) ? imageUrl.substring(dotIndex + 1) : "";
 
         MediaType mediaType = MediaType.IMAGE_PNG;
-        mediaType = switch (extension) {
-            case ".gif" -> MediaType.IMAGE_GIF;
-            case "jpeg" -> MediaType.IMAGE_JPEG;
-            default -> mediaType;
+        switch (extension) {
+            case ".gif":
+                mediaType = MediaType.IMAGE_GIF;
+                break;
+            case "jpeg":
+                mediaType = MediaType.IMAGE_JPEG;
+                break;
+
         };
 
         Path resourceDirectory = Paths.get("src","main", "java", "com", "example", "burningkey", "users", "images");

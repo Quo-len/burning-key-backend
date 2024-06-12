@@ -71,7 +71,8 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 }
                 String username = (String) clientMessage.get("username");
                 session.getAttributes().put("uid", uid);
-                RoomDTO room = roomService.addMember(username, uid, session);
+                String userImage = (String) clientMessage.get("userImage");
+                RoomDTO room = roomService.addMember(username, uid, session, userImage);
                 UserDTO user = UserDTO.builder()
                         .sessionId(session.getId())
                         .username(username)

@@ -20,6 +20,7 @@ public class UserDTO {
     private String currentWord;
     private Double completeText;
     private String sessionId;
+    private String userImage;
     @JsonIgnore
     private WebSocketSession session;
 }

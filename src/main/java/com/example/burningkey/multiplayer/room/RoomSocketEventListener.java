@@ -76,6 +76,7 @@ public class RoomSocketEventListener extends TextWebSocketHandler {
                 UserDTO user = UserDTO.builder()
                         .sessionId(session.getId())
                         .username(username)
+                        .userImage(userImage)
                         .build();
 
                 if (room.getStart().get() <= 0) {
